@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Veterinary AI Diagnostic & Health Screening Platform - Technical Specification & Architecture Whitepaper</title>
+<title>VetMyPet - AI Animal Health & Veterinary Diagnostic Platform - Technical Specification & Architecture Whitepaper</title>
 <style>
   @page {
     size: A4;
@@ -248,21 +248,21 @@
 <!-- Cover / Header -->
 <div class="cover">
   <span class="title-tag">System Architecture & Technical Specification</span>
-  <h1 class="main-title">Veterinary AI Animal Health & Diagnostic Platform</h1>
+  <h1 class="main-title">VetMyPet - AI Animal Health & Diagnostic Platform</h1>
   <div class="sub-title">An End-to-End Multimodal Video, Vision & Clinical Decision Support System</div>
   
   <div class="meta-grid">
     <div class="meta-item">
       <strong>Platform Version</strong>
-      <span>v2.4.0 (Production Core)</span>
+      <span>v2.5.0 (Production Core)</span>
     </div>
     <div class="meta-item">
       <strong>Core Backend</strong>
       <span>Go 1.22+ / SQLite WAL</span>
     </div>
     <div class="meta-item">
-      <strong>AI Architecture</strong>
-      <span>Dual-Stage Multimodal LLM</span>
+      <strong>Clinical AI Model</strong>
+      <span>viggovet/viggoVet-Reasoning-20B</span>
     </div>
     <div class="meta-item">
       <strong>Generated Date</strong>
@@ -274,10 +274,10 @@
 <!-- 1. Executive Summary -->
 <h2>1. Executive Summary & System Overview</h2>
 <p>
-The <strong>Veterinary AI Animal Health & Diagnostic Platform</strong> is a full-stack, multimodal clinical decision support system engineered for veterinary practitioners, veterinary technicians, agricultural livestock managers, and companion animal owners. The system ingests high-resolution still photographs and temporal live video recordings (e.g. motion, involuntary spasms, chorea, gait abnormalities, respiratory distress), extracts sequential keyframes, conducts objective computer vision inspection, and synthesizes visual evidence with owner-reported clinical history using specialized Large Multimodal Models (LMMs).
+The <strong>VetMyPet - AI Animal Health & Diagnostic Platform</strong> is a full-stack, multimodal clinical decision support system engineered for veterinary practitioners, veterinary technicians, agricultural livestock managers, and companion animal owners. The system ingests high-resolution still photographs and temporal live video recordings (e.g. motion, involuntary spasms, chorea, gait abnormalities, respiratory distress), extracts sequential keyframes, conducts objective computer vision inspection, and synthesizes visual evidence with owner-reported clinical history using specialized Large Multimodal Models (LMMs).
 </p>
 <p>
-Unlike conventional veterinary AI classifiers that rigidly classify dermatology lesions or force single disease predictions, this platform operates on an <strong>unbiased, broad-spectrum differential diagnosis framework</strong>. It evaluates infectious (viral, bacterial, fungal, parasitic), non-infectious (mechanical obstructions, toxicological, inflammatory, metabolic, traumatic), and behavioral presentations across canine, feline, bovine, equine, caprine, ovine, and avian species.
+Unlike conventional veterinary AI classifiers that rigidly classify dermatology lesions or force single disease predictions, this platform operates on an <strong>unbiased, broad-spectrum differential diagnosis framework</strong>. It evaluates infectious (viral, bacterial, fungal, parasitic), non-infectious (mechanical obstructions, toxicological, inflammatory, metabolic, traumatic), and behavioral presentations across canine, feline, bovine, equine, caprine, ovine, and avian species using <code>viggovet/viggoVet-Reasoning-20B</code> for veterinary clinical reasoning.
 </p>
 
 <!-- 2. Problem Statement -->
@@ -303,7 +303,7 @@ Unlike conventional veterinary AI classifiers that rigidly classify dermatology 
   <div class="card">
     <div class="card-header">🧠 Dual-Stage Multimodal AI Pipeline</div>
     <p style="font-size: 8.5pt; color: #475569; margin: 0;">
-      Strict separation of concerns: Stage 1 (<code>Qwen2.5-VL-72B-Instruct</code>) performs purely objective visual/motion extraction; Stage 2 (<code>Qwen2.5-72B-Instruct</code>) executes broad-spectrum veterinary internal medicine reasoning.
+      Strict separation of concerns: Stage 1 (<code>Qwen2.5-VL-72B-Instruct</code>) performs purely objective visual/motion extraction; Stage 2 (<code>viggovet/viggoVet-Reasoning-20B</code>) executes specialized veterinary internal medicine reasoning.
     </p>
   </div>
   <div class="card">
@@ -392,7 +392,7 @@ Unlike conventional veterinary AI classifiers that rigidly classify dermatology 
       <td><strong>AI Inference Layer</strong></td>
       <td>
         <code>Qwen2.5-VL-72B-Instruct</code><br>
-        <code>Qwen2.5-72B-Instruct</code><br>
+        <code>viggovet/viggoVet-Reasoning-20B</code><br>
         Hugging Face Router API
       </td>
       <td>
@@ -440,7 +440,7 @@ Unlike conventional veterinary AI classifiers that rigidly classify dermatology 
                                                      v
 +---------------------------------------------------------------------------------------------------------+
 |                           STAGE 2: VETERINARY INTERNAL MEDICINE REASONING                               |
-|                           Model: Qwen/Qwen2.5-72B-Instruct (Clinical Specialist)                        |
+|                           Model: viggovet/viggoVet-Reasoning-20B (Clinical Specialist)                  |
 |   Outputs JSON: 4-5 ranked differentials, pathophysiological reasons, confirmatory tests, triage urgency|
 +----------------------------------------------------+----------------------------------------------------+
                                                      |
@@ -488,7 +488,7 @@ To ensure the AI evaluates cases on a true medical spectrum without artificial d
 </p>
 <ul>
   <li><strong>Stage 1 (Vision):</strong> Strictly extracts physical abnormalities (e.g. *"lateral recumbency, bandaged right front paw, fluid/hematochezia stain near perineum, no voluntary movement"*). No disease names are injected into the prompt.</li>
-  <li><strong>Stage 2 (Veterinary Reasoning):</strong> Evaluates evidence across infectious (viral, bacterial, parasitic), mechanical (foreign bodies, obstructions), toxicological, inflammatory, and metabolic categories.</li>
+  <li><strong>Stage 2 (Veterinary Reasoning):</strong> Evaluates evidence across infectious (viral, bacterial, parasitic), mechanical (foreign bodies, obstructions), toxicological, inflammatory, and metabolic categories using <code>viggovet/viggoVet-Reasoning-20B</code>.</li>
 </ul>
 
 <div class="callout info">
@@ -677,7 +677,7 @@ The platform manages two segregated SQLite databases with automated versioned mi
 </table>
 
 <div style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #e2e8f0; font-size: 8pt; color: #64748b; text-align: center;">
-  Veterinary AI Animal Health & Diagnostic Platform &bull; Technical Whitepaper & System Documentation &bull; Built with Go, React, SQLite WAL & Multimodal AI
+  VetMyPet - AI Animal Health & Diagnostic Platform &bull; Technical Whitepaper & System Documentation &bull; Built with Go, React, SQLite WAL & Multimodal AI
 </div>
 
 </body>
