@@ -6,6 +6,7 @@ import {
   clearStoredAuth,
   getAnimals,
   getHealthHistory,
+  getNotifications,
   getStoredUser
 } from './api/client.js';
 
@@ -20,6 +21,11 @@ import Result from './pages/Result.jsx';
 import DiseaseInfo from './pages/DiseaseInfo.jsx';
 import History from './pages/History.jsx';
 import Emergency from './pages/Emergency.jsx';
+import Notifications from './pages/Notifications.jsx';
+import OutbreakDetail from './pages/OutbreakDetail.jsx';
+import VetConsultations from './pages/VetConsultations.jsx';
+import Inventory from './pages/Inventory.jsx';
+import Profile from './pages/Profile.jsx';
 import About from './pages/About.jsx';
 import Contact from './pages/Contact.jsx';
 
@@ -100,24 +106,37 @@ export default function App({ initialData }) {
   const [animals, setAnimals] = useState([]);
   const [apiError, setApiError] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [unreadAlertsCount, setUnreadAlertsCount] = useState(0);
+  const [urgentSOS, setUrgentSOS] = useState(null);
 
-  // Stored prediction history
+  // Stored prediction history & selected outbreak
   const [historyList, setHistoryList] = useState([]);
+  const [selectedOutbreakData, setSelectedOutbreakData] = useState({ outbreakId: null, initialOutbreak: null });
 
   // Browser History & Touchpad Gesture Support (Prevents browser closing on back swipe)
   useEffect(() => {
     const handlePopState = (event) => {
-      const targetPage = event.state?.page || window.location.hash.replace('#', '').trim() || 'home';
+      const targetPage = event.state?.page || window.location.hash.replace('#', '').trim() || (user?.role === 'vet' ? 'consultations' : 'home');
       setActivePage(targetPage);
       if (event.state?.activeResult) {
         setActiveResult(event.state.activeResult);
       }
+      if (event.state?.outbreakId || event.state?.initialOutbreak) {
+        setSelectedOutbreakData({
+          outbreakId: event.state.outbreakId,
+          initialOutbreak: event.state.initialOutbreak
+        });
+      }
     };
 
     // Ensure initial entry is pushed to history stack
-    const initialPage = window.location.hash.replace('#', '').trim() || 'home';
+    const defaultLanding = user?.role === 'vet' ? 'consultations' : 'home';
+    const initialPage = window.location.hash.replace('#', '').trim() || defaultLanding;
     if (!window.history.state || window.history.state.page !== initialPage) {
       window.history.replaceState({ page: initialPage }, '', '#' + initialPage);
+    }
+    if (initialPage !== activePage) {
+      setActivePage(initialPage);
     }
 
     window.addEventListener('popstate', handlePopState);
@@ -125,6 +144,12 @@ export default function App({ initialData }) {
   }, []);
 
   const navigateTo = (newPage, extraState = {}) => {
+    if (extraState?.outbreakId || extraState?.initialOutbreak) {
+      setSelectedOutbreakData({
+        outbreakId: extraState.outbreakId,
+        initialOutbreak: extraState.initialOutbreak
+      });
+    }
     if (newPage === activePage && window.location.hash === '#' + newPage) return;
     try {
       window.history.pushState({ page: newPage, ...extraState }, '', '#' + newPage);
@@ -137,7 +162,23 @@ export default function App({ initialData }) {
 
   useEffect(() => {
     refreshBackendState();
+    const interval = setInterval(loadAlerts, 30000);
+    return () => clearInterval(interval);
   }, [user?.id]);
+
+  const loadAlerts = async () => {
+    try {
+      const notifs = await getNotifications();
+      if (Array.isArray(notifs)) {
+        const unread = notifs.filter(n => !n.read);
+        setUnreadAlertsCount(unread.length);
+        const sos = notifs.find(n => n.is_sos || n.severity === 'CRITICAL' || n.severity === 'URGENT');
+        setUrgentSOS(sos || null);
+      }
+    } catch {
+      // ignore in background
+    }
+  };
 
   const refreshBackendState = async () => {
     try {
@@ -152,6 +193,7 @@ export default function App({ initialData }) {
         setHistoryList([]);
       }
       setApiError('');
+      loadAlerts();
     } catch (error) {
       setAnimals([]);
       setHistoryList([]);
@@ -199,9 +241,9 @@ export default function App({ initialData }) {
   const handleAuthSuccess = (auth) => {
     if (auth && auth.user) {
       setUser(auth.user);
+      refreshBackendState();
+      navigateTo(auth.user.role === 'vet' ? 'consultations' : 'home');
     }
-    refreshBackendState();
-    navigateTo('dashboard');
   };
 
   const handleLogout = () => {
@@ -209,41 +251,11 @@ export default function App({ initialData }) {
     setUser(null);
     setAnimals([]);
     setHistoryList([]);
-    setActiveResult(null);
-    navigateTo('login');
+    navigateTo('home');
   };
 
-  const handleSelectHistoryItem = (historyItem) => {
-    let resultObj = null;
-    if (historyItem.fullResult) {
-      resultObj = historyItem.fullResult;
-    } else {
-      resultObj = {
-        patient: { name: historyItem.patientName, species: historyItem.species || 'Animal', breed: historyItem.breed },
-        symptoms: historyItem.symptoms,
-        evaluatedAt: historyItem.date,
-        triageStatus: {
-          level: historyItem.triageLevel || 'GREEN',
-          title: `${historyItem.triageLevel || 'GREEN'} Triage`,
-          message: 'Historical record triage evaluation.',
-          hasRedFlags: historyItem.triageLevel === 'RED',
-          redFlagList: []
-        },
-        topMatches: [
-          {
-            id: 'h_match',
-            name: historyItem.topDisease,
-            confidence: historyItem.confidence,
-            urgencyLevel: historyItem.urgency,
-            pathogenType: 'Clinical Record',
-            incubationPeriod: 'Varies',
-            description: 'Archived case evaluation.',
-            clinicalDiagnostics: ['Standard CBC', 'Cytology'],
-            matchedSymptoms: historyItem.symptoms
-          }
-        ]
-      };
-    }
+  const handleSelectHistoryItem = (item) => {
+    const resultObj = historyToResult(item);
     setActiveResult(resultObj);
     navigateTo('result', { activeResult: resultObj });
   };
@@ -259,6 +271,7 @@ export default function App({ initialData }) {
           user={user}
           setUser={setUser}
           onLogout={handleLogout}
+          unreadAlertsCount={unreadAlertsCount}
         />
 
         {/* Main Page Routing */}
@@ -270,6 +283,45 @@ export default function App({ initialData }) {
               scannerPresets={scannerPresets}
               isAnalyzing={isAnalyzing}
               apiError={apiError}
+              urgentSOS={urgentSOS}
+            />
+          )}
+
+          {activePage === 'notifications' && (
+            <Notifications
+              setActivePage={navigateTo}
+              user={user}
+            />
+          )}
+
+          {activePage === 'outbreak-detail' && (
+            <OutbreakDetail
+              outbreakId={selectedOutbreakData.outbreakId}
+              initialOutbreak={selectedOutbreakData.initialOutbreak}
+              setActivePage={navigateTo}
+              user={user}
+            />
+          )}
+
+          {activePage === 'consultations' && (
+            <VetConsultations
+              setActivePage={navigateTo}
+              user={user}
+            />
+          )}
+
+          {activePage === 'inventory' && (
+            <Inventory
+              setActivePage={navigateTo}
+              user={user}
+            />
+          )}
+
+          {activePage === 'profile' && (
+            <Profile
+              user={user}
+              setUser={setUser}
+              setActivePage={navigateTo}
             />
           )}
 
@@ -498,5 +550,36 @@ function screeningToHistory(screening, patient = {}) {
     triageLevel: triage.level,
     symptoms: screening.symptoms?.symptoms || [],
     fullResult: screeningToResult(screening, patient)
+  };
+}
+
+function historyToResult(historyItem) {
+  if (historyItem.fullResult) {
+    return historyItem.fullResult;
+  }
+  return {
+    patient: { name: historyItem.patientName, species: historyItem.species || 'Animal', breed: historyItem.breed },
+    symptoms: historyItem.symptoms,
+    evaluatedAt: historyItem.date,
+    triageStatus: {
+      level: historyItem.triageLevel || 'GREEN',
+      title: `${historyItem.triageLevel || 'GREEN'} Triage`,
+      message: 'Historical record triage evaluation.',
+      hasRedFlags: historyItem.triageLevel === 'RED',
+      redFlagList: []
+    },
+    topMatches: [
+      {
+        id: 'h_match',
+        name: historyItem.topDisease,
+        confidence: historyItem.confidence,
+        urgencyLevel: historyItem.urgency,
+        pathogenType: 'Clinical Record',
+        incubationPeriod: 'Varies',
+        description: 'Archived case evaluation.',
+        clinicalDiagnostics: ['Standard CBC', 'Cytology'],
+        matchedSymptoms: historyItem.symptoms
+      }
+    ]
   };
 }

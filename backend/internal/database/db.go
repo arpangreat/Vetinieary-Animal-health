@@ -155,13 +155,38 @@ CREATE INDEX IF NOT EXISTS idx_animals_user_id ON animals(user_id);
 CREATE INDEX IF NOT EXISTS idx_reminders_user_id ON reminders(user_id);
 `,
 		},
+		{
+			Version: 4,
+			Name:    "add_livestock_pashu_tag_and_screening_geo",
+			Up: `
+ALTER TABLE animals ADD COLUMN tag_number TEXT;
+ALTER TABLE animals ADD COLUMN herd_size INTEGER DEFAULT 0;
+ALTER TABLE animals ADD COLUMN village TEXT;
+ALTER TABLE animals ADD COLUMN taluka TEXT;
+ALTER TABLE animals ADD COLUMN district TEXT;
+
+ALTER TABLE health_screenings ADD COLUMN user_id INTEGER DEFAULT 0;
+ALTER TABLE health_screenings ADD COLUMN district TEXT;
+ALTER TABLE health_screenings ADD COLUMN taluka TEXT;
+ALTER TABLE health_screenings ADD COLUMN farm_name TEXT;
+ALTER TABLE health_screenings ADD COLUMN vet_review_requested INTEGER DEFAULT 0;
+CREATE INDEX IF NOT EXISTS idx_animals_tag_number ON animals(tag_number);
+CREATE INDEX IF NOT EXISTS idx_screenings_user_id ON health_screenings(user_id);
+`,
+		},
 	}
 
 	return RunMigrations(ctx, db.DB, migrations)
 }
 
 func (db *DB) ListAnimals(ctx context.Context, userID int64) ([]models.Animal, error) {
-	rows, err := db.QueryContext(ctx, `SELECT id,user_id,name,species,COALESCE(breed,''),COALESCE(age,''),COALESCE(sex,''),COALESCE(photo_url,''),COALESCE(notes,''),COALESCE(weight,''),created_at FROM animals WHERE (?=0 OR user_id=?) ORDER BY created_at DESC`, userID, userID)
+	rows, err := db.QueryContext(ctx, `
+SELECT id, user_id, name, species, COALESCE(breed,''), COALESCE(age,''), COALESCE(sex,''),
+       COALESCE(tag_number,''), COALESCE(herd_size,0), COALESCE(village,''), COALESCE(taluka,''), COALESCE(district,''),
+       COALESCE(photo_url,''), COALESCE(notes,''), COALESCE(weight,''), created_at
+FROM animals
+WHERE (?=0 OR user_id=?)
+ORDER BY created_at DESC`, userID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -169,7 +194,11 @@ func (db *DB) ListAnimals(ctx context.Context, userID int64) ([]models.Animal, e
 	out := make([]models.Animal, 0)
 	for rows.Next() {
 		var a models.Animal
-		if err := rows.Scan(&a.ID, &a.UserID, &a.Name, &a.Species, &a.Breed, &a.Age, &a.Sex, &a.PhotoURL, &a.Notes, &a.Weight, &a.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&a.ID, &a.UserID, &a.Name, &a.Species, &a.Breed, &a.Age, &a.Sex,
+			&a.TagNumber, &a.HerdSize, &a.Village, &a.Taluka, &a.District,
+			&a.PhotoURL, &a.Notes, &a.Weight, &a.CreatedAt,
+		); err != nil {
 			return nil, err
 		}
 		out = append(out, a)
@@ -181,8 +210,12 @@ func (db *DB) CreateAnimal(ctx context.Context, a models.Animal) (models.Animal,
 	if a.UserID == 0 {
 		a.UserID = 1
 	}
-	res, err := db.ExecContext(ctx, `INSERT INTO animals (user_id,name,species,breed,age,sex,photo_url,notes,weight) VALUES (?,?,?,?,?,?,?,?,?)`,
-		a.UserID, a.Name, a.Species, a.Breed, a.Age, a.Sex, a.PhotoURL, a.Notes, a.Weight)
+	res, err := db.ExecContext(ctx, `
+INSERT INTO animals (user_id, name, species, breed, age, sex, tag_number, herd_size, village, taluka, district, photo_url, notes, weight)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		a.UserID, a.Name, a.Species, a.Breed, a.Age, a.Sex,
+		a.TagNumber, a.HerdSize, a.Village, a.Taluka, a.District,
+		a.PhotoURL, a.Notes, a.Weight)
 	if err != nil {
 		return models.Animal{}, err
 	}
@@ -193,8 +226,16 @@ func (db *DB) CreateAnimal(ctx context.Context, a models.Animal) (models.Animal,
 
 func (db *DB) GetAnimal(ctx context.Context, id int64) (models.Animal, error) {
 	var a models.Animal
-	err := db.QueryRowContext(ctx, `SELECT id,user_id,name,species,COALESCE(breed,''),COALESCE(age,''),COALESCE(sex,''),COALESCE(photo_url,''),COALESCE(notes,''),COALESCE(weight,''),created_at FROM animals WHERE id=?`, id).
-		Scan(&a.ID, &a.UserID, &a.Name, &a.Species, &a.Breed, &a.Age, &a.Sex, &a.PhotoURL, &a.Notes, &a.Weight, &a.CreatedAt)
+	err := db.QueryRowContext(ctx, `
+SELECT id, user_id, name, species, COALESCE(breed,''), COALESCE(age,''), COALESCE(sex,''),
+       COALESCE(tag_number,''), COALESCE(herd_size,0), COALESCE(village,''), COALESCE(taluka,''), COALESCE(district,''),
+       COALESCE(photo_url,''), COALESCE(notes,''), COALESCE(weight,''), created_at
+FROM animals WHERE id=?`, id).
+		Scan(
+			&a.ID, &a.UserID, &a.Name, &a.Species, &a.Breed, &a.Age, &a.Sex,
+			&a.TagNumber, &a.HerdSize, &a.Village, &a.Taluka, &a.District,
+			&a.PhotoURL, &a.Notes, &a.Weight, &a.CreatedAt,
+		)
 	return a, err
 }
 
@@ -223,9 +264,11 @@ func (db *DB) CreateScreening(ctx context.Context, s models.HealthScreening) (mo
 			species = s.VisualAnalysis.Animal
 		}
 		animal, err := db.CreateAnimal(ctx, models.Animal{
-			UserID:  1,
-			Name:    "Patient",
-			Species: species,
+			UserID:   s.UserID,
+			Name:     "Patient",
+			Species:  species,
+			District: s.District,
+			Taluka:   s.Taluka,
 		})
 		if err == nil {
 			s.AnimalID = animal.ID
@@ -234,8 +277,10 @@ func (db *DB) CreateScreening(ctx context.Context, s models.HealthScreening) (mo
 	sym, _ := json.Marshal(s.Symptoms)
 	vis, _ := json.Marshal(s.VisualAnalysis)
 	assess, _ := json.Marshal(s.Assessment)
-	res, err := db.ExecContext(ctx, `INSERT INTO health_screenings (animal_id,media_url,media_type,symptoms_json,visual_analysis_json,assessment_json,urgency) VALUES (?,?,?,?,?,?,?)`,
-		s.AnimalID, s.MediaURL, s.MediaType, string(sym), string(vis), string(assess), s.Urgency)
+	res, err := db.ExecContext(ctx, `
+INSERT INTO health_screenings (animal_id, user_id, media_url, media_type, symptoms_json, visual_analysis_json, assessment_json, urgency, district, taluka, farm_name, vet_review_requested)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		s.AnimalID, s.UserID, s.MediaURL, s.MediaType, string(sym), string(vis), string(assess), s.Urgency, s.District, s.Taluka, s.FarmName, boolInt(s.VetReviewRequested))
 	if err != nil {
 		return models.HealthScreening{}, err
 	}
@@ -245,7 +290,11 @@ func (db *DB) CreateScreening(ctx context.Context, s models.HealthScreening) (mo
 }
 
 func (db *DB) GetScreening(ctx context.Context, id int64) (models.HealthScreening, error) {
-	rows, err := db.QueryContext(ctx, `SELECT id,animal_id,COALESCE(media_url,''),COALESCE(media_type,''),symptoms_json,visual_analysis_json,assessment_json,urgency,created_at FROM health_screenings WHERE id=?`, id)
+	rows, err := db.QueryContext(ctx, `
+SELECT id, animal_id, COALESCE(user_id,0), COALESCE(media_url,''), COALESCE(media_type,''),
+       symptoms_json, visual_analysis_json, assessment_json, urgency,
+       COALESCE(district,''), COALESCE(taluka,''), COALESCE(farm_name,''), COALESCE(vet_review_requested,0), created_at
+FROM health_screenings WHERE id=?`, id)
 	if err != nil {
 		return models.HealthScreening{}, err
 	}
@@ -261,13 +310,15 @@ func (db *DB) GetScreening(ctx context.Context, id int64) (models.HealthScreenin
 }
 
 func (db *DB) ListScreenings(ctx context.Context, userID int64, animalID int64) ([]models.HealthScreening, error) {
-	query := `SELECT hs.id, hs.animal_id, COALESCE(hs.media_url,''), COALESCE(hs.media_type,''), 
-	                 hs.symptoms_json, hs.visual_analysis_json, hs.assessment_json, hs.urgency, hs.created_at 
-	          FROM health_screenings hs
-	          JOIN animals a ON hs.animal_id = a.id
-	          WHERE (?=0 OR a.user_id=?) AND (?=0 OR hs.animal_id=?)
-	          ORDER BY hs.created_at DESC`
-	rows, err := db.QueryContext(ctx, query, userID, userID, animalID, animalID)
+	query := `
+SELECT hs.id, hs.animal_id, COALESCE(hs.user_id, a.user_id), COALESCE(hs.media_url,''), COALESCE(hs.media_type,''), 
+       hs.symptoms_json, hs.visual_analysis_json, hs.assessment_json, hs.urgency,
+       COALESCE(hs.district, a.district, ''), COALESCE(hs.taluka, a.taluka, ''), COALESCE(hs.farm_name, ''), COALESCE(hs.vet_review_requested,0), hs.created_at 
+FROM health_screenings hs
+JOIN animals a ON hs.animal_id = a.id
+WHERE (?=0 OR hs.user_id=? OR a.user_id=?) AND (?=0 OR hs.animal_id=?)
+ORDER BY hs.created_at DESC`
+	rows, err := db.QueryContext(ctx, query, userID, userID, userID, animalID, animalID)
 	if err != nil {
 		return nil, err
 	}
@@ -280,9 +331,15 @@ func scanScreenings(rows *sql.Rows) ([]models.HealthScreening, error) {
 	for rows.Next() {
 		var s models.HealthScreening
 		var symptomsJSON, visualJSON, assessmentJSON string
-		if err := rows.Scan(&s.ID, &s.AnimalID, &s.MediaURL, &s.MediaType, &symptomsJSON, &visualJSON, &assessmentJSON, &s.Urgency, &s.CreatedAt); err != nil {
+		var vetReview int
+		if err := rows.Scan(
+			&s.ID, &s.AnimalID, &s.UserID, &s.MediaURL, &s.MediaType,
+			&symptomsJSON, &visualJSON, &assessmentJSON, &s.Urgency,
+			&s.District, &s.Taluka, &s.FarmName, &vetReview, &s.CreatedAt,
+		); err != nil {
 			return nil, err
 		}
+		s.VetReviewRequested = vetReview == 1
 		if err := json.Unmarshal([]byte(symptomsJSON), &s.Symptoms); err != nil {
 			return nil, err
 		}

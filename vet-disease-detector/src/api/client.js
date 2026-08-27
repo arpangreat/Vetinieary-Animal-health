@@ -63,12 +63,7 @@ export async function loginAccount(payload) {
 export async function signupAccount(payload) {
   const res = await request('/api/auth/signup', { 
     method: 'POST', 
-    body: JSON.stringify({
-      name: payload.name || payload.fullName,
-      email: payload.email,
-      password: payload.password,
-      role: payload.role || 'owner'
-    }) 
+    body: JSON.stringify(payload) 
   });
   return setStoredAuth(res);
 }
@@ -109,6 +104,17 @@ export async function changeUserPassword({ oldPassword, newPassword }) {
 export async function getAuthLogs() {
   try {
     const res = await request('/api/auth/logs');
+    return Array.isArray(res) ? res : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function getVets(district = '') {
+  try {
+    const params = new URLSearchParams();
+    if (district) params.append('district', district);
+    const res = await request(`/api/vets?${params.toString()}`);
     return Array.isArray(res) ? res : [];
   } catch {
     return [];
@@ -172,6 +178,98 @@ export async function getReminders() {
 export async function getNearbyClinics(urgency = 'moderate') {
   try {
     const res = await request(`/api/clinics/nearby?urgency=${encodeURIComponent(urgency)}`);
+    return Array.isArray(res) ? res : [];
+  } catch {
+    return [];
+  }
+}
+
+// Outbreak Surveillance & SOS Notifications
+export async function getOutbreaks(district = '', species = '') {
+  try {
+    const params = new URLSearchParams();
+    if (district) params.append('district', district);
+    if (species) params.append('species', species);
+    const res = await request(`/api/outbreaks?${params.toString()}`);
+    return Array.isArray(res) ? res : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function getOutbreak(id) {
+  return request(`/api/outbreaks/${id}`);
+}
+
+export async function reportOutbreak(outbreak) {
+  return request('/api/outbreaks', { method: 'POST', body: JSON.stringify(outbreak) });
+}
+
+export async function reportOutbreakRecovery(payload) {
+  return request('/api/outbreaks/report-recovery', { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export async function resolveOutbreak(payload) {
+  return request('/api/outbreaks/resolve', { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export async function getNotifications() {
+  try {
+    const res = await request('/api/notifications');
+    return Array.isArray(res) ? res : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function markNotificationRead(id) {
+  return request('/api/notifications/read', { method: 'POST', body: JSON.stringify({ id }) });
+}
+
+export async function markAllNotificationsRead() {
+  return request('/api/notifications/read-all', { method: 'POST', body: JSON.stringify({}) });
+}
+
+// Vet Case Consultations & Second Opinions
+export async function getVetConsultations(status = '') {
+  try {
+    const res = await request(`/api/vet-consultations?status=${encodeURIComponent(status)}`);
+    return Array.isArray(res) ? res : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function requestVetConsultation(payload) {
+  return request('/api/vet-consultations', { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export async function reviewVetConsultation(payload) {
+  return request('/api/vet-consultations/review', { method: 'POST', body: JSON.stringify(payload) });
+}
+
+// Medical & Vaccine Inventory Tracking
+export async function getInventory(district = '', orgType = '', myInventory = false) {
+  try {
+    const params = new URLSearchParams();
+    if (district) params.append('district', district);
+    if (orgType) params.append('org_type', orgType);
+    if (myInventory) params.append('my_inventory', 'true');
+    const res = await request(`/api/inventory?${params.toString()}`);
+    return Array.isArray(res) ? res : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function upsertInventory(item) {
+  return request('/api/inventory', { method: 'POST', body: JSON.stringify(item) });
+}
+
+// Government & NGO Advisories
+export async function getGovAdvisories(district = '') {
+  try {
+    const res = await request(`/api/gov-advisories?district=${encodeURIComponent(district)}`);
     return Array.isArray(res) ? res : [];
   } catch {
     return [];

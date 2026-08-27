@@ -6,7 +6,8 @@ export default function Home({
   onRunPrediction,
   scannerPresets = [],
   isAnalyzing = false,
-  apiError = ''
+  apiError = '',
+  urgentSOS = null
 }) {
   const [dragActive, setDragActive] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -100,75 +101,75 @@ export default function Home({
   };
 
   const stopCamera = () => {
-    if (isRecordingVideo) {
-      stopVideoRecording();
-    }
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
     setCameraOpen(false);
+    clearInterval(recordTimerRef.current);
     setIsRecordingVideo(false);
-    setRecordDuration(0);
   };
 
   const captureCameraPhoto = () => {
-    const video = videoRef.current;
-    if (!video) return;
+    if (!videoRef.current) return;
     const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth || 1280;
-    canvas.height = video.videoHeight || 720;
-    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-    canvas.toBlob(async (blob) => {
-      if (!blob) return;
-      const file = new File([blob], `camera-scan-${Date.now()}.jpg`, { type: 'image/jpeg' });
-      stopCamera();
-      await handleFileSelected(file);
-    }, 'image/jpeg', 0.9);
+    canvas.width = videoRef.current.videoWidth || 640;
+    canvas.height = videoRef.current.videoHeight || 480;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const file = new File([blob], `live_capture_${Date.now()}.jpg`, { type: 'image/jpeg' });
+        handleFileSelected(file);
+      }
+    }, 'image/jpeg', 0.92);
   };
 
   const startVideoRecording = () => {
     if (!streamRef.current) return;
     recordedChunksRef.current = [];
-    setIsRecordingVideo(true);
     setRecordDuration(0);
 
-    const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' :
-      MediaRecorder.isTypeSupported('video/webm') ? 'video/webm' : 'video/mp4';
+    const mimeTypes = ['video/webm;codecs=vp9', 'video/webm', 'video/mp4'];
+    let supportedMime = '';
+    for (const m of mimeTypes) {
+      if (MediaRecorder.isTypeSupported(m)) {
+        supportedMime = m;
+        break;
+      }
+    }
 
     try {
-      const recorder = new MediaRecorder(streamRef.current, { mimeType: mime });
-      mediaRecorderRef.current = recorder;
-
-      recorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) {
-          recordedChunksRef.current.push(e.data);
+      const recorder = new MediaRecorder(streamRef.current, supportedMime ? { mimeType: supportedMime } : undefined);
+      recorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          recordedChunksRef.current.push(event.data);
         }
       };
-
-      recorder.onstop = async () => {
-        clearInterval(recordTimerRef.current);
-        const ext = mime.includes('mp4') ? 'mp4' : 'webm';
-        const blob = new Blob(recordedChunksRef.current, { type: mime });
-        const file = new File([blob], `gait-motion-${Date.now()}.${ext}`, { type: mime });
-        stopCamera();
-        await handleFileSelected(file);
+      recorder.onstop = () => {
+        const blob = new Blob(recordedChunksRef.current, { type: supportedMime || 'video/webm' });
+        const ext = supportedMime.includes('mp4') ? 'mp4' : 'webm';
+        const file = new File([blob], `gait_video_${Date.now()}.${ext}`, { type: blob.type });
+        handleFileSelected(file);
       };
 
-      recorder.start(250);
+      mediaRecorderRef.current = recorder;
+      recorder.start(500);
+      setIsRecordingVideo(true);
+
+      const startTime = Date.now();
       recordTimerRef.current = setInterval(() => {
-        setRecordDuration((prev) => {
-          if (prev >= 12) {
-            stopVideoRecording();
-            return 12;
-          }
-          return prev + 1;
-        });
-      }, 1000);
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        setRecordDuration(elapsed);
+        if (elapsed >= 12) {
+          stopVideoRecording();
+        }
+      }, 500);
     } catch (err) {
-      console.error('MediaRecorder error:', err);
-      setCameraError('Video recording unsupported on this browser. Please upload a video file instead.');
-      setIsRecordingVideo(false);
+      console.error('Video recording init error:', err);
     }
   };
 
@@ -219,7 +220,43 @@ export default function Home({
   };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
+      
+      {/* Urgent Outbreak SOS Notification Banner */}
+      {urgentSOS && (
+        <div 
+          onClick={() => {
+            if (urgentSOS.outbreak_id) {
+              setActivePage('outbreak-detail', { outbreakId: urgentSOS.outbreak_id });
+            } else {
+              setActivePage('notifications');
+            }
+          }}
+          className="bg-gradient-to-r from-red-600 via-red-700 to-rose-800 text-white p-4 sm:p-5 rounded-2xl shadow-xl border-2 border-red-400/80 cursor-pointer hover:shadow-2xl hover:scale-[1.008] transition-all animate-pulse"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white text-red-600 text-xl font-black flex items-center justify-center shadow-md">
+                🚨
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-white/20 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    {urgentSOS.severity || 'CRITICAL'} OUTBREAK SOS
+                  </span>
+                  <span className="text-xs text-red-100 font-bold">📍 {urgentSOS.district || 'Regional Alert'}</span>
+                </div>
+                <h3 className="text-sm font-black mt-0.5 text-white">{urgentSOS.title}</h3>
+                <p className="text-xs text-red-100 leading-snug font-medium line-clamp-1">{urgentSOS.message}</p>
+              </div>
+            </div>
+            <div className="hidden sm:flex items-center gap-1.5 bg-white text-red-700 font-black text-xs px-3.5 py-2 rounded-xl shadow-sm whitespace-nowrap">
+              <span>View Outbreak Map & Protocols</span>
+              <span>→</span>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Top Main Hero & Instant AI Scanner */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950 rounded-3xl p-6 sm:p-10 text-white shadow-2xl border border-slate-800 relative overflow-hidden">

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PredictionCard from '../components/PredictionCard.jsx';
-import { getNearbyClinics, mediaURL } from '../api/client.js';
+import { getNearbyClinics, mediaURL, requestVetConsultation } from '../api/client.js';
 
 export default function Result({
   activeResult,
@@ -9,6 +9,9 @@ export default function Result({
 }) {
   const [clinics, setClinics] = useState([]);
   const [clinicError, setClinicError] = useState('');
+  const [showVetReviewModal, setShowVetReviewModal] = useState(false);
+  const [vetDoubtReason, setVetDoubtReason] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   useEffect(() => {
     if (!activeResult) return;
@@ -16,6 +19,28 @@ export default function Result({
       .then(setClinics)
       .catch((error) => setClinicError(error.message || 'Could not load veterinary services.'));
   }, [activeResult]);
+
+  const handleRequestVetReview = async (e) => {
+    e.preventDefault();
+    setSubmittingReview(true);
+    try {
+      await requestVetConsultation({
+        screening_id: activeResult.id || 0,
+        species: activeResult.visualAnalysis?.animal || activeResult.patient?.species || 'Animal Subject',
+        media_url: activeResult.mediaUrl || '',
+        symptoms: typeof activeResult.symptoms === 'string' ? activeResult.symptoms : (activeResult.symptoms?.symptoms || []).join(', ') || 'AI scan requiring second opinion',
+        doubt_reason: vetDoubtReason
+      });
+      setShowVetReviewModal(false);
+      setVetDoubtReason('');
+      alert('Diagnostic case successfully sent to veterinary queue. Redirecting to your consultations portal.');
+      setActivePage('consultations');
+    } catch (err) {
+      alert('Could not submit case: ' + err.message);
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   if (!activeResult) {
     return (
@@ -239,7 +264,13 @@ export default function Result({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setShowVetReviewModal(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm flex items-center gap-1.5 transition-colors"
+          >
+            <span>🩺 Request Vet Review</span>
+          </button>
           <button
             onClick={handlePrint}
             className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm flex items-center gap-1.5"
@@ -254,6 +285,52 @@ export default function Result({
           </button>
         </div>
       </div>
+
+      {/* Vet Review Request Modal */}
+      {showVetReviewModal && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200 space-y-4 text-xs animate-in fade-in zoom-in duration-150">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="font-black text-slate-900 text-base">Request Vet Second Opinion</h3>
+                <p className="text-[11px] text-slate-500">Send this diagnostic scan to licensed veterinary doctors</p>
+              </div>
+              <button onClick={() => setShowVetReviewModal(false)} className="text-slate-400 hover:text-slate-700 text-lg font-bold">✕</button>
+            </div>
+
+            <form onSubmit={handleRequestVetReview} className="space-y-3">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Specific Doubt or Clinical Concern</label>
+                <textarea
+                  rows={3}
+                  required
+                  placeholder="e.g. The animal isn't responding to saline wash, or I suspect a secondary foot infection. Please advise on proper dosage."
+                  value={vetDoubtReason}
+                  onChange={(e) => setVetDoubtReason(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowVetReviewModal(false)}
+                  className="w-1/3 bg-slate-100 text-slate-700 font-bold py-2.5 rounded-xl"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingReview}
+                  className="w-2/3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl shadow-md transition-colors"
+                >
+                  {submittingReview ? 'Sending to Queue...' : '✓ Submit To Vet Queue'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Triage Urgency Level Card */}
       <div className={`p-6 sm:p-8 rounded-3xl border-2 shadow-sm ${
