@@ -669,18 +669,40 @@ VALUES (0, 'vet', ?, ?, 'INFO', 0, 0, '#vet-consultations', CURRENT_TIMESTAMP)`,
 }
 
 func (s *SurveillanceDB) ListVetConsultations(ctx context.Context, vetID int64, userID int64, status string) ([]models.VetConsultation, error) {
-	query := `
+	if vetID <= 0 && userID <= 0 {
+		return []models.VetConsultation{}, nil
+	}
+
+	var query string
+	var rows *sql.Rows
+	var err error
+
+	if vetID > 0 {
+		// Veterinarian view: see all incoming cases in district / queue
+		query = `
 SELECT id, screening_id, user_id, user_name, user_role, COALESCE(user_phone,''), COALESCE(location,''),
        vet_id, COALESCE(vet_name,''), animal_name, species, COALESCE(breed,''), COALESCE(media_url,''),
        symptoms_json, COALESCE(owner_notes,''), ai_diagnosis, ai_urgency,
        COALESCE(vet_diagnosis,''), COALESCE(vet_suggestion,''), COALESCE(vet_prescriptions,''),
        status, created_at, updated_at
 FROM vet_consultations
-WHERE (? = 0 OR user_id = ?)
-  AND (? = '' OR status = ?)
+WHERE (? = '' OR status = ?)
 ORDER BY CASE status WHEN 'pending' THEN 1 ELSE 2 END, created_at DESC`
-
-	rows, err := s.QueryContext(ctx, query, userID, userID, status, status)
+		rows, err = s.QueryContext(ctx, query, status, status)
+	} else {
+		// Farmer / Pet owner view: see ONLY their own submitted cases
+		query = `
+SELECT id, screening_id, user_id, user_name, user_role, COALESCE(user_phone,''), COALESCE(location,''),
+       vet_id, COALESCE(vet_name,''), animal_name, species, COALESCE(breed,''), COALESCE(media_url,''),
+       symptoms_json, COALESCE(owner_notes,''), ai_diagnosis, ai_urgency,
+       COALESCE(vet_diagnosis,''), COALESCE(vet_suggestion,''), COALESCE(vet_prescriptions,''),
+       status, created_at, updated_at
+FROM vet_consultations
+WHERE user_id = ?
+  AND (? = '' OR status = ?)
+ORDER BY created_at DESC`
+		rows, err = s.QueryContext(ctx, query, userID, status, status)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -808,7 +830,10 @@ func (s *SurveillanceDB) UpsertInventory(ctx context.Context, item models.Invent
 		return models.InventoryItem{}, fmt.Errorf("item name is required")
 	}
 
-	status := "in_stock"
+	status := item.Status
+	if status == "" {
+		status = "in_stock"
+	}
 	if item.Quantity <= 0 {
 		status = "critical"
 	} else if item.Quantity <= item.MinThreshold {
@@ -817,11 +842,20 @@ func (s *SurveillanceDB) UpsertInventory(ctx context.Context, item models.Invent
 	item.Status = status
 
 	if item.ID > 0 {
-		_, err := s.ExecContext(ctx, `
+		var existingUserID int64
+		err := s.QueryRowContext(ctx, `SELECT user_id FROM inventories WHERE id = ?`, item.ID).Scan(&existingUserID)
+		if err != nil {
+			return models.InventoryItem{}, fmt.Errorf("inventory item not found")
+		}
+		if existingUserID != 0 && existingUserID != item.UserID {
+			return models.InventoryItem{}, fmt.Errorf("permission denied: inventory stock can only be managed by the user who added it")
+		}
+
+		_, err = s.ExecContext(ctx, `
 UPDATE inventories
 SET item_name = ?, category = ?, quantity = ?, unit = ?, min_threshold = ?, expiry_date = ?, status = ?, updated_at = CURRENT_TIMESTAMP
-WHERE id = ? AND (user_id = ? OR ? = 0)`,
-			item.ItemName, item.Category, item.Quantity, item.Unit, item.MinThreshold, item.ExpiryDate, item.Status, item.ID, item.UserID, item.UserID)
+WHERE id = ?`,
+			item.ItemName, item.Category, item.Quantity, item.Unit, item.MinThreshold, item.ExpiryDate, item.Status, item.ID)
 		if err != nil {
 			return models.InventoryItem{}, err
 		}
@@ -835,6 +869,14 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
 		}
 		item.ID, _ = res.LastInsertId()
 	}
+
+	_ = s.QueryRowContext(ctx, `
+SELECT user_id, owner_name, org_type, district, item_name, category, quantity, unit, min_threshold, COALESCE(expiry_date,''), status, updated_at
+FROM inventories WHERE id = ?`, item.ID).Scan(
+		&item.UserID, &item.OwnerName, &item.OrgType, &item.District, &item.ItemName,
+		&item.Category, &item.Quantity, &item.Unit, &item.MinThreshold, &item.ExpiryDate,
+		&item.Status, &item.UpdatedAt,
+	)
 
 	s.notifyChange()
 	return item, nil
@@ -862,4 +904,62 @@ ORDER BY created_at DESC LIMIT 30`, district, district)
 		list = append(list, a)
 	}
 	return list, rows.Err()
+}
+
+func (s *SurveillanceDB) CreateGovAdvisory(ctx context.Context, a models.GovAdvisory) (models.GovAdvisory, error) {
+	if a.Title == "" || a.Content == "" {
+		return models.GovAdvisory{}, fmt.Errorf("title and content are required")
+	}
+	if a.DateIssued == "" {
+		a.DateIssued = time.Now().Format("02 Jan 2006")
+	}
+	if a.Urgency == "" {
+		a.Urgency = "HIGH"
+	}
+	res, err := s.ExecContext(ctx, `
+INSERT INTO gov_advisories (issuer, title, content, district, category, urgency, date_issued, created_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+		a.Issuer, a.Title, a.Content, a.District, a.Category, a.Urgency, a.DateIssued)
+	if err != nil {
+		return models.GovAdvisory{}, err
+	}
+	a.ID, _ = res.LastInsertId()
+
+	// Broadcast Notification for all farmers, pet owners, vets
+	targetDistrict := a.District
+	if targetDistrict == "" {
+		targetDistrict = "Statewide"
+	}
+	isSOS := 0
+	if a.Urgency == "CRITICAL" {
+		isSOS = 1
+	}
+	_, _ = s.ExecContext(ctx, `
+INSERT INTO notifications (user_id, role_target, district, title, message, severity, is_sos, read, action_url, created_at)
+VALUES (0, 'all', ?, ?, ?, ?, ?, 0, '#notifications', CURRENT_TIMESTAMP)`,
+		targetDistrict,
+		fmt.Sprintf("📢 Official Directive: %s", a.Title),
+		fmt.Sprintf("Issued by %s (%s). %s", a.Issuer, a.District, a.Content),
+		a.Urgency, isSOS,
+	)
+
+	s.notifyChange()
+	return a, nil
+}
+
+func (s *SurveillanceDB) DeleteInventory(ctx context.Context, id int64, userID int64) error {
+	var existingUserID int64
+	err := s.QueryRowContext(ctx, `SELECT user_id FROM inventories WHERE id = ?`, id).Scan(&existingUserID)
+	if err != nil {
+		return fmt.Errorf("inventory item not found")
+	}
+	if existingUserID != 0 && existingUserID != userID {
+		return fmt.Errorf("permission denied: inventory stock can only be deleted by the user who added it")
+	}
+
+	_, err = s.ExecContext(ctx, `DELETE FROM inventories WHERE id = ?`, id)
+	if err == nil {
+		s.notifyChange()
+	}
+	return err
 }

@@ -98,12 +98,21 @@ export default function Notifications({ setActivePage, user }) {
               ✓ Mark All As Read
             </button>
           )}
-          <button
-            onClick={() => setActivePage('home')}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-md transition-colors"
-          >
-            🩺 Run New Scan
-          </button>
+          {user?.role === 'vet' ? (
+            <button
+              onClick={() => setActivePage('consultations')}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-md transition-colors flex items-center gap-1.5"
+            >
+              <span>📋 Doctor Review Queue</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => setActivePage('home')}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-md transition-colors"
+            >
+              🩺 Run New Scan
+            </button>
+          )}
         </div>
       </div>
 

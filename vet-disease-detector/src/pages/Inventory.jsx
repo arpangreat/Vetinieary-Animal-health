@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getInventory, upsertInventory } from '../api/client.js';
+import { getInventory, upsertInventory, updateInventory, deleteInventory } from '../api/client.js';
 
 export default function Inventory({ user, setActivePage }) {
   const [items, setItems] = useState([]);
@@ -7,15 +7,18 @@ export default function Inventory({ user, setActivePage }) {
   const [filterDistrict, setFilterDistrict] = useState(user?.district || 'All');
   const [filterCategory, setFilterCategory] = useState('All');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   const isStaff = user?.role === 'vet' || user?.role === 'ngo' || user?.role === 'gov';
 
   const [form, setForm] = useState({
+    id: 0,
     item_name: '',
     category: 'vaccine',
     quantity: 100,
     unit: 'vials',
+    min_threshold: 20,
     expiry_date: '',
     status: 'in_stock'
   });
@@ -36,21 +39,76 @@ export default function Inventory({ user, setActivePage }) {
     }
   };
 
-  const handleAddItem = async (e) => {
+  const handleOpenAdd = () => {
+    setEditingItem(null);
+    setForm({
+      id: 0,
+      item_name: '',
+      category: 'vaccine',
+      quantity: 100,
+      unit: 'vials',
+      min_threshold: 20,
+      expiry_date: '',
+      status: 'in_stock'
+    });
+    setShowAddModal(true);
+  };
+
+  const handleOpenEdit = (item) => {
+    setEditingItem(item);
+    setForm({
+      id: item.id || 0,
+      item_name: item.item_name || '',
+      category: item.category || 'vaccine',
+      quantity: item.quantity || 0,
+      unit: item.unit || 'vials',
+      min_threshold: item.min_threshold || 20,
+      expiry_date: item.expiry_date || '',
+      status: item.status || 'in_stock'
+    });
+    setShowAddModal(true);
+  };
+
+  const handleDeleteItem = async (id) => {
+    if (!window.confirm('Are you sure you want to remove this stock record from the inventory?')) return;
+    try {
+      await deleteInventory(id);
+      setItems(prev => prev.filter(it => it.id !== id));
+      await loadInventory();
+    } catch (err) {
+      alert('Failed to delete item: ' + err.message);
+    }
+  };
+
+  const handleSaveItem = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await upsertInventory({
+      const payload = {
         ...form,
+        id: form.id || 0,
         quantity: Number(form.quantity) || 0,
-        district: user?.district || 'Pune'
-      });
+        min_threshold: Number(form.min_threshold) || 20,
+        district: editingItem?.district || user?.district || 'Pune'
+      };
+
+      if (form.id > 0) {
+        const res = await updateInventory(payload);
+        setItems(prev => prev.map(it => it.id === form.id ? { ...it, ...payload, ...res } : it));
+      } else {
+        const res = await upsertInventory(payload);
+        setItems(prev => [res, ...prev]);
+      }
+
       setShowAddModal(false);
+      setEditingItem(null);
       setForm({
+        id: 0,
         item_name: '',
         category: 'vaccine',
         quantity: 100,
         unit: 'vials',
+        min_threshold: 20,
         expiry_date: '',
         status: 'in_stock'
       });
@@ -82,16 +140,16 @@ export default function Inventory({ user, setActivePage }) {
             Medication, Vaccines & Tool Inventory
           </h1>
           <p className="text-xs text-teal-200 mt-1 max-w-2xl leading-relaxed">
-            Real-time tracking of vaccines (FMD, LSD, PPR, Rabies), broad-spectrum antibiotics, antiseptic wound care, and mobile clinic field kits across Maharashtra dispensaries.
+            Real-time tracking and editing of vaccines (FMD, LSD, PPR, Rabies), broad-spectrum antibiotics, antiseptic wound care, and mobile clinic field kits across Maharashtra dispensaries.
           </p>
         </div>
 
         {isStaff && (
           <button
-            onClick={() => setShowAddModal(true)}
+            onClick={handleOpenAdd}
             className="bg-teal-500 hover:bg-teal-400 text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl shadow-lg transition-colors flex items-center gap-1.5 self-start sm:self-auto"
           >
-            <span>+</span> Add Stock / Manage Supply
+            <span>+</span> Add New Stock
           </button>
         )}
       </div>
@@ -130,6 +188,8 @@ export default function Inventory({ user, setActivePage }) {
               <option value="Nagpur">Nagpur</option>
               <option value="Nashik">Nashik</option>
               <option value="Solapur">Solapur</option>
+              <option value="Satara">Satara</option>
+              <option value="Sangli">Sangli</option>
             </select>
           </div>
         </div>
@@ -149,7 +209,8 @@ export default function Inventory({ user, setActivePage }) {
                 <th className="py-3.5 px-4">District</th>
                 <th className="py-3.5 px-4">Available Quantity</th>
                 <th className="py-3.5 px-4">Expiry Date</th>
-                <th className="py-3.5 px-5 text-right">Availability Status</th>
+                <th className="py-3.5 px-4 text-center">Availability Status</th>
+                {isStaff && <th className="py-3.5 px-5 text-right">Actions</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -163,7 +224,7 @@ export default function Inventory({ user, setActivePage }) {
                   <td className="py-4 px-4 text-slate-600 font-medium">📍 {item.district}</td>
                   <td className="py-4 px-4 font-black text-slate-900">{item.quantity} {item.unit}</td>
                   <td className="py-4 px-4 text-slate-500">{item.expiry_date || 'Standard Stock'}</td>
-                  <td className="py-4 px-5 text-right">
+                  <td className="py-4 px-4 text-center">
                     <span className={`text-[10px] font-black px-2.5 py-1 rounded-full uppercase ${
                       item.status === 'in_stock'
                         ? 'bg-emerald-100 text-emerald-800'
@@ -174,6 +235,32 @@ export default function Inventory({ user, setActivePage }) {
                       {item.status.replace('_', ' ')}
                     </span>
                   </td>
+                  {isStaff && (
+                    <td className="py-3 px-4 text-right">
+                      {(!item.user_id || item.user_id === user?.id) ? (
+                        <>
+                          <button
+                            onClick={() => handleOpenEdit(item)}
+                            className="bg-slate-100 hover:bg-teal-50 text-slate-800 hover:text-teal-800 font-bold px-3 py-1.5 rounded-lg mr-2 transition-colors border border-slate-200 hover:border-teal-300"
+                            title="Edit stock quantity, threshold or status"
+                          >
+                            ✏️ Edit Stock
+                          </button>
+                          <button
+                            onClick={() => handleDeleteItem(item.id)}
+                            className="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                            title="Delete stock item"
+                          >
+                            🗑️
+                          </button>
+                        </>
+                      ) : (
+                        <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 inline-flex items-center gap-1">
+                          <span>🔒</span> Managed by {item.owner_name || 'Other Provider'}
+                        </span>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -186,11 +273,13 @@ export default function Inventory({ user, setActivePage }) {
         <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200 space-y-4 text-xs animate-in fade-in zoom-in duration-150">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h3 className="font-black text-slate-900 text-base">Add / Update Medical Supply</h3>
+              <h3 className="font-black text-slate-900 text-base">
+                {editingItem ? '✏️ Edit & Update Medical Supply' : '➕ Add New Medical Supply'}
+              </h3>
               <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-700 text-lg font-bold">✕</button>
             </div>
 
-            <form onSubmit={handleAddItem} className="space-y-3">
+            <form onSubmit={handleSaveItem} className="space-y-3">
               <div>
                 <label className="block font-bold text-slate-700 mb-1">Item Name *</label>
                 <input
@@ -232,28 +321,69 @@ export default function Inventory({ user, setActivePage }) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="col-span-1">
                   <label className="block font-bold text-slate-700 mb-1">Quantity</label>
                   <input
                     type="number"
-                    min="1"
+                    min="0"
                     value={form.quantity}
                     onChange={(e) => setForm({ ...form, quantity: e.target.value })}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 focus:ring-2 focus:ring-teal-500 focus:outline-none"
                   />
                 </div>
-                <div>
+                <div className="col-span-1">
                   <label className="block font-bold text-slate-700 mb-1">Unit</label>
                   <input
                     type="text"
-                    placeholder="vials / doses / bottles"
+                    placeholder="vials / doses"
                     value={form.unit}
                     onChange={(e) => setForm({ ...form, unit: e.target.value })}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 focus:ring-2 focus:ring-teal-500 focus:outline-none"
                   />
                 </div>
+                <div className="col-span-1">
+                  <label className="block font-bold text-slate-700 mb-1">Min Alert</label>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="20"
+                    value={form.min_threshold}
+                    onChange={(e) => setForm({ ...form, min_threshold: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                  />
+                </div>
               </div>
+
+              {/* Quick Adjustment Buttons when Editing */}
+              {editingItem && (
+                <div>
+                  <label className="block font-bold text-slate-500 mb-1 text-[11px]">Quick Restock Adjustment:</label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, quantity: Number(form.quantity || 0) + 10 })}
+                      className="bg-teal-50 text-teal-800 font-bold px-2.5 py-1 rounded-lg border border-teal-200 hover:bg-teal-100"
+                    >
+                      +10 Units
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, quantity: Number(form.quantity || 0) + 50 })}
+                      className="bg-teal-50 text-teal-800 font-bold px-2.5 py-1 rounded-lg border border-teal-200 hover:bg-teal-100"
+                    >
+                      +50 Batch
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, quantity: Math.max(0, Number(form.quantity || 0) - 10) })}
+                      className="bg-slate-100 text-slate-700 font-bold px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-200"
+                    >
+                      -10 Dispensed
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="block font-bold text-slate-700 mb-1">Expiry Date</label>
@@ -278,7 +408,7 @@ export default function Inventory({ user, setActivePage }) {
                   disabled={submitting}
                   className="w-2/3 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-xl shadow-md transition-colors"
                 >
-                  {submitting ? 'Saving...' : 'Save Stock Record'}
+                  {submitting ? 'Saving...' : editingItem ? 'Save Updates' : 'Add Stock Record'}
                 </button>
               </div>
             </form>

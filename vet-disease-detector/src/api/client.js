@@ -126,13 +126,49 @@ export async function createAnimal(animal) {
   return request('/api/animals', { method: 'POST', body: JSON.stringify(animal) });
 }
 
-export async function getAnimals() {
-  const res = await request('/api/animals');
+export async function updateAnimal(animal) {
+  return request(`/api/animals/${animal.id}`, { method: 'PUT', body: JSON.stringify(animal) });
+}
+
+export async function deleteAnimal(id) {
+  return request(`/api/animals/${id}`, { method: 'DELETE' });
+}
+
+export async function getAnimals(params = {}) {
+  let url = '/api/animals';
+  const qParams = new URLSearchParams();
+  if (params.q) qParams.append('q', params.q);
+  if (params.tag_number) qParams.append('tag_number', params.tag_number);
+  const qStr = qParams.toString();
+  if (qStr) url += `?${qStr}`;
+  const res = await request(url);
   return Array.isArray(res) ? res : [];
+}
+
+export async function getAnimalByTag(tagNumber) {
+  return request(`/api/animals/tag/${encodeURIComponent(tagNumber)}`);
 }
 
 export async function getAnimal(id) {
   return request(`/api/animals/${id}`);
+}
+
+// Clinic Diagnostic & Laboratory Test Results (Private & Vet Issued)
+export async function getClinicTestResults(animalId = 0) {
+  try {
+    const url = animalId ? `/api/clinic-test-results?animal_id=${animalId}` : '/api/clinic-test-results';
+    const res = await request(url);
+    return Array.isArray(res) ? res : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function publishClinicTestResult(testData) {
+  return request('/api/clinic-test-results', {
+    method: 'POST',
+    body: JSON.stringify(testData)
+  });
 }
 
 // Health Screening & Media
@@ -266,6 +302,14 @@ export async function upsertInventory(item) {
   return request('/api/inventory', { method: 'POST', body: JSON.stringify(item) });
 }
 
+export async function updateInventory(item) {
+  return request('/api/inventory', { method: 'PUT', body: JSON.stringify(item) });
+}
+
+export async function deleteInventory(id) {
+  return request(`/api/inventory?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+}
+
 // Government & NGO Advisories
 export async function getGovAdvisories(district = '') {
   try {
@@ -274,6 +318,10 @@ export async function getGovAdvisories(district = '') {
   } catch {
     return [];
   }
+}
+
+export async function publishGovAdvisory(advisory) {
+  return request('/api/gov-advisories', { method: 'POST', body: JSON.stringify(advisory) });
 }
 
 export function mediaURL(path) {

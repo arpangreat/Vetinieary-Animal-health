@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>VetMyPet - AI Animal Health & Outbreak Surveillance Platform - Technical Specification & Architecture Whitepaper</title>
+<title>PashuRakshak (पशुरक्षक) - Animal Health & Outbreak Surveillance Platform - Technical Specification & Architecture Whitepaper</title>
 <style>
   @page {
     size: A4;
@@ -253,8 +253,8 @@
 <!-- Cover / Header -->
 <div class="cover">
   <span class="title-tag">System Architecture & Technical Specification Whitepaper</span>
-  <h1 class="main-title">VetMyPet - AI Animal Health & Outbreak Surveillance Platform</h1>
-  <div class="sub-title">An End-to-End Multimodal Clinical AI, Geospatial Outbreak Sensing & Coordinated Epidemic Defense System</div>
+  <h1 class="main-title">PashuRakshak (पशुरक्षक) - Animal Health & Outbreak Surveillance Platform</h1>
+  <div class="sub-title">An End-to-End Clinical Screening, Geospatial Outbreak Sensing & Coordinated Epidemic Defense System</div>
   
   <div class="meta-grid">
     <div class="meta-item">
@@ -266,12 +266,12 @@
       <span>Go 1.22+ / Triple SQLite WAL</span>
     </div>
     <div class="meta-item">
-      <strong>Clinical AI Engine</strong>
+      <strong>Clinical Decision Engine</strong>
       <span>viggovet/viggoVet-Reasoning-20B</span>
     </div>
     <div class="meta-item">
       <strong>Document Edition</strong>
-      <span>v3.2.0 Production Release</span>
+      <span>v3.4.0 Production Release</span>
     </div>
   </div>
 </div>
@@ -286,7 +286,7 @@
   </p>
 </div>
 <p>
-The <strong>VetMyPet</strong> platform is engineered as a direct solution to this mandate, uniting dairy farmers, pastoralists, licensed veterinary doctors, dispensaries, NGOs, and state authorities into an interconnected, real-time epidemiological grid.
+The <strong>PashuRakshak</strong> platform is engineered as a direct solution to this mandate, uniting dairy farmers, pastoralists, licensed veterinary doctors, dispensaries, NGOs, and state authorities into an interconnected, real-time epidemiological grid.
 </p>
 
 <!-- 2. System Architecture & Multi-Role Portals -->
@@ -299,19 +299,19 @@ To address fragmentation between field workers and clinical facilities, the plat
   <div class="card">
     <div class="card-header">🚜 Livestock Farmers & Dairy Owners (<code>farmer</code>)</div>
     <p style="font-size: 8pt; color: #475569; margin: 0;">
-      Registers farm name, village (गावाचे नाव), taluka, district, livestock types (Cattle, Buffalo, Goat, Sheep, Poultry, Swine), and herd size. Features livestock AI video/photo screening, real-time outbreak SOS radar, recovery reporting (<code>POST /api/outbreaks/report-recovery</code>), and nearby clinic directory.
+      Registers farm name, village (गावाचे नाव), taluka, district, livestock types (Cattle, Buffalo, Goat, Sheep, Poultry, Swine), and herd size. Features livestock video/photo screening, real-time outbreak SOS radar, recovery reporting (<code>POST /api/outbreaks/report-recovery</code>), and nearby clinic directory.
     </p>
   </div>
   <div class="card">
     <div class="card-header">🐾 Companion Pet Parents (<code>pet_owner</code>)</div>
     <p style="font-size: 8pt; color: #475569; margin: 0;">
-      Registers address, city, district, and pincode. Features instant AI lesion & motion gait scanner, broad-spectrum contagion alerts (e.g. Canine Parvovirus, Feline Panleukopenia), and one-tap doctor second-opinion requests.
+      Registers address, city, district, and pincode. Features instant lesion & motion gait screening, broad-spectrum contagion alerts (e.g. Canine Parvovirus, Feline Panleukopenia), and one-tap doctor second-opinion requests.
     </p>
   </div>
   <div class="card">
     <div class="card-header">🩺 Licensed Veterinarians & Clinics (<code>vet</code>)</div>
     <p style="font-size: 8pt; color: #475569; margin: 0;">
-      Dedicated Doctor Decision Hub: Case Review Queue to inspect doubtful AI scans, verify diagnoses, issue ℞ prescriptions, manage live clinic operating hours, broadcast current field visiting locations, and post leave notices.
+      Dedicated Doctor Decision Hub: Case Review Queue to inspect doubtful screenings, verify diagnoses, issue ℞ prescriptions, manage live clinic operating hours, broadcast current field visiting locations, and post leave notices.
     </p>
   </div>
   <div class="card">
@@ -325,7 +325,7 @@ To address fragmentation between field workers and clinical facilities, the plat
 <!-- 3. Dynamic Outbreak Sensing & Resolution Engine -->
 <h2>3. Dynamic Outbreak Sensing, Vet Consensus & Resolution Engine</h2>
 <p>
-Unlike static alert placeholders, VetMyPet incorporates a dynamic epidemiological state engine:
+Unlike static alert placeholders, PashuRakshak incorporates a dynamic epidemiological state engine:
 </p>
 
 <div class="card-grid">
@@ -358,7 +358,7 @@ Unlike static alert placeholders, VetMyPet incorporates a dynamic epidemiologica
 
 <div class="diagram-box">
 +---------------------------------------------------------------------------------------------------------------------------------+
-|                                                   VETMYPET FRONTEND SPA (React 18 / Tailwind)                                    |
+|                                                 PASHURAKSHAK FRONTEND SPA (React 18 / Tailwind)                                 |
 |   [Farmers: Herd Scanner & Outbreak SOS]    [Vets: Case Queue & Duty Management]    [Directory & Biosecurity Defense Radar]      |
 +---------------------------------------------------------------+-----------------------------------------------------------------+
                                                                 |
@@ -378,56 +378,59 @@ Unlike static alert placeholders, VetMyPet incorporates a dynamic epidemiologica
 |  - FFmpeg 4-Frame Keyframe Generator (JPEG)    |   |  Stage 2: viggovet/viggoVet-Reasoning-20B      |   |  - Farmer Cluster &ge;3|
 +------------------------------------------------+   +------------------------------------------------+   +-----------------------+
                                                                 |
-                                             Persistence across Segregated Databases
                                                                 v
-+---------------------------------------------------------------+-----------------------------------------------------------------+
-|                                              TRIPLE-DATABASE ARCHITECTURE (SQLite WAL)                                           |
-|   &bull; user.db (v4): Profiles, Roles, Geolocation, Clinic Duty & Leave Notices, Bcrypt Credentials, Audit Logs                  |
-|   &bull; animal_health.db (v4): Patients, Tag Numbers, Media Metadata, Multimodal Screenings, Reminders                             |
-|   &bull; surveillance.db (v2): Outbreak Clusters, SOS Notifications, Vet Review Queue, Dispensary Supplies, Govt Circulars       |
-+---------------------------------------------------------------------------------------------------------------------------------+
+                                      +----------------------------------------------------+
+                                      |                 TRIPLE SQLITE 3 WAL STORAGE        |
+                                      |  - user.db: User accounts, Bcrypt hashes & auth    |
+                                      |  - animal_health.db: Profiles, Aadhaar & Labs (v5) |
+                                      |  - surveillance.db: Outbreaks, SOS & Circulars     |
+                                      +----------------------------------------------------+
 </div>
 
-<!-- 5. Triple Database Architecture -->
-<h2>5. Triple-Database Architecture & Migration Specifications</h2>
+<!-- 5. Multi-Database Architecture -->
+<h2>5. Triple SQLite Schema Architecture & Data Flow Isolation</h2>
 <p>
-To ensure absolute data isolation, zero cross-table lock contention, and audit compliance, the system maintains three segregated databases:
+To ensure fault isolation and prevent surveillance queries from competing with clinic authentication, storage is split into three independent SQLite databases running in Write-Ahead Logging (WAL) mode:
 </p>
 
 <table>
   <thead>
     <tr>
-      <th style="width: 20%;">Database</th>
-      <th style="width: 25%;">Table Entity</th>
-      <th style="width: 55%;">Schema Columns & Role Definition</th>
+      <th style="width: 25%;">Database & Engine</th>
+      <th style="width: 25%;">Table Name</th>
+      <th style="width: 50%;">Schema Structure & Key Indexes</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td rowspan="3"><strong><code>user.db</code></strong><br><small>Schema v4 (WAL)</small></td>
+      <td rowspan="4"><strong><code>user.db</code></strong><br><small>Schema v4 (WAL)</small></td>
       <td><code>users</code></td>
-      <td><code>id (PK)</code>, <code>email (UNIQUE)</code>, <code>role</code>, <code>password_hash</code>, <code>phone</code>, <code>address</code>, <code>city</code>, <code>district</code>, <code>state</code>, <code>pincode</code>, <code>farm_name</code>, <code>farm_village</code>, <code>farm_taluka</code>, <code>livestock_types</code>, <code>herd_size</code>, <code>clinic_name</code>, <code>clinic_address</code>, <code>clinic_hours</code>, <code>clinic_availability</code>, <code>clinic_visiting_location</code>, <code>unavailability_notice</code>, <code>created_at</code>, <code>updated_at</code></td>
+      <td><code>id (PK)</code>, <code>name</code>, <code>email (UNIQUE)</code>, <code>password_hash</code>, <code>role</code>, <code>district</code>, <code>clinic_name</code>, <code>is_available</code>, <code>visiting_location</code>, <code>leave_notes</code>, <code>created_at</code></td>
     </tr>
     <tr>
       <td><code>sessions</code></td>
-      <td><code>token (PK)</code>, <code>user_id (FK)</code>, <code>user_agent</code>, <code>ip_address</code>, <code>expires_at</code>, <code>created_at</code></td>
+      <td><code>token (PK)</code>, <code>user_id (INDEX)</code>, <code>role</code>, <code>expires_at</code>, <code>created_at</code></td>
     </tr>
     <tr>
-      <td><code>auth_logs</code></td>
+      <td><code>user_profiles</code></td>
+      <td><code>user_id (PK)</code>, <code>farm_name</code>, <code>herd_size</code>, <code>village</code>, <code>taluka</code>, <code>district</code>, <code>clinic_hours</code>, <code>updated_at</code></td>
+    </tr>
+    <tr>
+      <td><code>audit_logs</code></td>
       <td><code>id (PK)</code>, <code>user_id</code>, <code>email</code>, <code>event</code>, <code>ip_address</code>, <code>details</code>, <code>created_at</code></td>
     </tr>
     <tr>
-      <td rowspan="4"><strong><code>animal_health.db</code></strong><br><small>Schema v4 (WAL)</small></td>
+      <td rowspan="4"><strong><code>animal_health.db</code></strong><br><small>Schema v5 (WAL)</small></td>
       <td><code>animals</code></td>
-      <td><code>id (PK)</code>, <code>user_id (INDEX)</code>, <code>name</code>, <code>species</code>, <code>breed</code>, <code>tag_number</code>, <code>herd_size</code>, <code>village</code>, <code>taluka</code>, <code>district</code>, <code>notes</code>, <code>created_at</code></td>
-    </tr>
-    <tr>
-      <td><code>media</code></td>
-      <td><code>id (PK)</code>, <code>url</code>, <code>path</code>, <code>type</code>, <code>mime_type</code>, <code>size</code>, <code>created_at</code></td>
+      <td><code>id (PK)</code>, <code>user_id</code>, <code>name</code>, <code>species</code>, <code>breed</code>, <code>age</code>, <code>sex</code>, <code>tag_number</code> (12-digit Pashu Aadhaar), <code>herd_size</code>, <code>village</code>, <code>taluka</code>, <code>district</code>, <code>photo_url</code>, <code>notes</code>, <code>weight</code>, <code>created_at</code></td>
     </tr>
     <tr>
       <td><code>health_screenings</code></td>
-      <td><code>id (PK)</code>, <code>animal_id</code>, <code>user_id</code>, <code>media_url</code>, <code>symptoms_json</code>, <code>visual_analysis_json</code>, <code>assessment_json</code>, <code>urgency</code>, <code>district</code>, <code>taluka</code>, <code>farm_name</code>, <code>created_at</code></td>
+      <td><code>id (PK)</code>, <code>animal_id</code>, <code>user_id</code>, <code>media_url</code>, <code>symptoms_json</code>, <code>visual_analysis_json</code>, <code>assessment_json</code>, <code>urgency</code>, <code>district</code>, <code>taluka</code>, <code>farm_name</code>, <code>vet_review_requested</code>, <code>created_at</code></td>
+    </tr>
+    <tr>
+      <td><code>clinic_test_results</code></td>
+      <td><code>id (PK)</code>, <code>animal_id</code>, <code>user_id</code> (owner), <code>vet_id</code>, <code>vet_name</code>, <code>clinic_name</code>, <code>test_type</code>, <code>sample_date</code>, <code>test_parameters_json</code>, <code>interpretation</code>, <code>status</code> ('Normal'|'Abnormal'|'Critical'), <code>recommendation</code>, <code>created_at</code></td>
     </tr>
     <tr>
       <td><code>reminders</code></td>
@@ -542,9 +545,39 @@ To ensure absolute data isolation, zero cross-table lock contention, and audit c
       <td>Doctor submits clinical diagnosis, advice, and ℞ prescriptions. Triggers consensus check.</td>
     </tr>
     <tr>
+      <td><code>GET /api/animals</code></td>
+      <td><code>?q=...&tag_number=...</code></td>
+      <td>Fetches user's animals (farmers/owners) or full regional directory with Pashu Aadhaar search (veterinarians).</td>
+    </tr>
+    <tr>
+      <td><code>GET /api/animals/tag/:tag</code></td>
+      <td>Public / Auth</td>
+      <td>Instant lookup of any livestock or companion animal by 12-digit Pashu Aadhaar ear tag.</td>
+    </tr>
+    <tr>
+      <td><code>PUT /api/animals/:id</code></td>
+      <td><code>X-Auth-Token</code></td>
+      <td>Updates animal profile details (species, breed, age, weight, Pashu Aadhaar tag, clinical notes).</td>
+    </tr>
+    <tr>
+      <td><code>GET /api/clinic-test-results</code></td>
+      <td><code>?animal_id=...</code></td>
+      <td>Confidential retrieval of doctor-issued lab test reports (accessible only by owner and attending vets).</td>
+    </tr>
+    <tr>
+      <td><code>POST /api/clinic-test-results</code></td>
+      <td><code>X-Auth-Token (Vet)</code></td>
+      <td>Veterinarian publishes official lab test report (CBC, Mastitis CMT, PCR) and notifies animal owner.</td>
+    </tr>
+    <tr>
       <td><code>GET /api/inventory</code></td>
       <td><code>?district=...</code></td>
       <td>Returns dynamic stock of vaccines, antibiotics, antiseptics, and PPE supplies.</td>
+    </tr>
+    <tr>
+      <td><code>PUT / DELETE /api/inventory</code></td>
+      <td><code>X-Auth-Token</code></td>
+      <td>Updates or deletes inventory stock with strict ownership enforcement (only the creator can modify).</td>
     </tr>
     <tr>
       <td><code>GET /api/gov-advisories</code></td>
@@ -595,7 +628,7 @@ To ensure absolute data isolation, zero cross-table lock contention, and audit c
 </table>
 
 <div style="margin-top: 20px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 7.5pt; color: #64748b; text-align: center;">
-  VetMyPet &bull; AI Animal Health & Outbreak Surveillance Platform &bull; In Alignment with Maharashtra PS ID 26128 &bull; Go, React 18, Triple SQLite WAL, Qwen2.5-VL & ViggoVet
+  PashuRakshak (पशुरक्षक) &bull; Livestock & Companion Animal Health & Outbreak Surveillance Platform &bull; In Alignment with Maharashtra PS ID 26128 &bull; Go, React 18, Triple SQLite WAL, Qwen2.5-VL & ViggoVet
 </div>
 
 </body>

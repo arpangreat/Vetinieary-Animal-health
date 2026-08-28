@@ -206,7 +206,7 @@ export default function Profile({ user, setUser, setActivePage }) {
           }`}
         >
           <span>ℹ️</span>
-          <span>About VetMyPet Platform</span>
+          <span>About PashuRakshak (पशुरक्षक)</span>
         </button>
       </div>
 
@@ -507,9 +507,9 @@ export default function Profile({ user, setUser, setActivePage }) {
       {activeTab === 'about' && (
         <div className="space-y-6">
           <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-            <h2 className="text-xl font-black text-slate-900">About VetMyPet Early Warning & Surveillance Platform</h2>
+            <h2 className="text-xl font-black text-slate-900">About PashuRakshak (पशुरक्षक) Surveillance Platform</h2>
             <p className="text-xs text-slate-600 leading-relaxed">
-              VetMyPet is an advanced artificial intelligence system built in alignment with <strong>Problem Statement ID 26128 (Government of Maharashtra & Maharashtra State Innovation Society)</strong>. It provides unified early detection, biosecurity defense protocols, and coordinated outbreak response across village, block, and district levels.
+              PashuRakshak is an advanced animal health and syndromic surveillance system built in alignment with <strong>Problem Statement ID 26128 (Government of Maharashtra & Maharashtra State Innovation Society)</strong>. It provides unified early detection, biosecurity defense protocols, and coordinated outbreak response across village, block, and district levels.
             </p>
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">

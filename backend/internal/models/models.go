@@ -105,6 +105,24 @@ type Animal struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type ClinicTestResult struct {
+	ID                 int64     `json:"id"`
+	AnimalID           int64     `json:"animal_id"`
+	AnimalName         string    `json:"animal_name,omitempty"`
+	Species            string    `json:"species,omitempty"`
+	UserID             int64     `json:"user_id"`
+	VetID              int64     `json:"vet_id"`
+	VetName            string    `json:"vet_name"`
+	ClinicName         string    `json:"clinic_name"`
+	TestType           string    `json:"test_type"`
+	SampleDate         string    `json:"sample_date"`
+	TestParametersJSON string    `json:"test_parameters_json,omitempty"`
+	Interpretation     string    `json:"interpretation"`
+	Status             string    `json:"status"` // Normal, Abnormal, Critical
+	Recommendation     string    `json:"recommendation"`
+	CreatedAt          time.Time `json:"created_at"`
+}
+
 type Media struct {
 	ID        int64     `json:"id"`
 	URL       string    `json:"url"`

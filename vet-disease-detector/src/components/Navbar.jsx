@@ -3,9 +3,24 @@ import React, { useState } from 'react';
 export default function Navbar({ activePage, setActivePage, user, setUser, onLogout, unreadAlertsCount = 0 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const isNGOorGov = user?.role === 'ngo' || user?.role === 'gov';
   const isVet = user?.role === 'vet';
 
-  const navItems = isVet
+  const navItems = isNGOorGov
+    ? [
+        { id: 'dashboard', label: 'Directives & Dashboard', icon: '📢' },
+        { 
+          id: 'notifications', 
+          label: 'Outbreak Radar', 
+          icon: '🚨', 
+          hasBadge: true,
+          badgeCount: unreadAlertsCount
+        },
+        { id: 'inventory', label: 'Relief Inventory', icon: '📦' },
+        { id: 'consultations', label: 'Vet Directory', icon: '🩺' },
+        { id: 'emergency', label: '1962 Helpline', icon: '📞' }
+      ]
+    : isVet
     ? [
         { id: 'consultations', label: 'Doctor Review Queue', icon: '🩺' },
         { 
@@ -50,17 +65,17 @@ export default function Navbar({ activePage, setActivePage, user, setUser, onLog
           {/* Logo */}
           <div 
             className="flex items-center space-x-3 cursor-pointer select-none"
-            onClick={() => handleNavClick(isVet ? 'consultations' : 'home')}
+            onClick={() => handleNavClick(isNGOorGov ? 'dashboard' : isVet ? 'consultations' : 'home')}
           >
             <div className="w-10 h-10 rounded-2xl bg-emerald-600 flex items-center justify-center text-white text-xl shadow-md shadow-emerald-500/20">
               🐾
             </div>
             <div>
               <div className="flex items-center space-x-1.5">
-                <span className="text-lg font-black tracking-tight text-slate-900">VetMyPet</span>
-                <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">AI 2.0</span>
+                <span className="text-lg font-black tracking-tight text-slate-900">PashuRakshak</span>
+                <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">पशुरक्षक</span>
               </div>
-              <p className="text-[11px] text-slate-400 font-medium">Early Detection & Outbreak Surveillance</p>
+              <p className="text-[11px] text-slate-400 font-medium">Animal Health & Outbreak Surveillance Grid</p>
             </div>
           </div>
 

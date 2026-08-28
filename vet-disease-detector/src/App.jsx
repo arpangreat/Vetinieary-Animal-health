@@ -40,7 +40,7 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('VetMyPet Render Error:', error, errorInfo);
+    console.error('PashuRakshak Render Error:', error, errorInfo);
   }
 
   render() {
@@ -104,6 +104,7 @@ export default function App({ initialData }) {
   const [activeResult, setActiveResult] = useState(null);
   const [selectedDiseaseModal, setSelectedDiseaseModal] = useState(null);
   const [animals, setAnimals] = useState([]);
+  const [selectedPatient, setSelectedPatient] = useState(null);
   const [apiError, setApiError] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [unreadAlertsCount, setUnreadAlertsCount] = useState(0);
@@ -181,6 +182,13 @@ export default function App({ initialData }) {
   };
 
   const refreshBackendState = async () => {
+    if (!user) {
+      setAnimals([]);
+      setHistoryList([]);
+      setApiError('');
+      loadAlerts();
+      return;
+    }
     try {
       const [animalRows, screeningRows] = await Promise.all([
         getAnimals(),
@@ -251,6 +259,7 @@ export default function App({ initialData }) {
     setUser(null);
     setAnimals([]);
     setHistoryList([]);
+    setActiveResult(null);
     navigateTo('home');
   };
 
@@ -278,12 +287,16 @@ export default function App({ initialData }) {
         <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {activePage === 'home' && (
             <Home
+              user={user}
               setActivePage={navigateTo}
               onRunPrediction={handleRunPrediction}
               scannerPresets={scannerPresets}
               isAnalyzing={isAnalyzing}
               apiError={apiError}
               urgentSOS={urgentSOS}
+              animals={animals}
+              selectedPatient={selectedPatient}
+              setSelectedPatient={setSelectedPatient}
             />
           )}
 
@@ -307,6 +320,8 @@ export default function App({ initialData }) {
             <VetConsultations
               setActivePage={navigateTo}
               user={user}
+              setUser={setUser}
+              animals={animals}
             />
           )}
 
@@ -348,6 +363,8 @@ export default function App({ initialData }) {
               onSelectHistoryItem={handleSelectHistoryItem}
               animals={animals}
               onRefresh={refreshBackendState}
+              selectedPatient={selectedPatient}
+              setSelectedPatient={setSelectedPatient}
             />
           )}
 
@@ -362,11 +379,15 @@ export default function App({ initialData }) {
 
           {activePage === 'prediction' && (
             <Prediction
+              user={user}
               scannerPresets={scannerPresets}
               onRunPrediction={handleRunPrediction}
               setActivePage={navigateTo}
               apiError={apiError}
               isAnalyzing={isAnalyzing}
+              animals={animals}
+              selectedPatient={selectedPatient}
+              setSelectedPatient={setSelectedPatient}
             />
           )}
 
@@ -388,6 +409,7 @@ export default function App({ initialData }) {
 
           {activePage === 'history' && (
             <History
+              user={user}
               historyList={historyList}
               onSelectHistoryItem={handleSelectHistoryItem}
               setActivePage={navigateTo}

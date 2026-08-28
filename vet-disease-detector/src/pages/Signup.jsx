@@ -78,7 +78,7 @@ export default function Signup({ setActivePage, onAuthSuccess, setUser }) {
         <div className="w-14 h-14 bg-emerald-600 rounded-2xl text-white text-3xl flex items-center justify-center mx-auto shadow-md shadow-emerald-500/20">
           🐾
         </div>
-        <h2 className="text-2xl sm:text-3xl font-black text-slate-900">Create VetMyPet Account</h2>
+        <h2 className="text-2xl sm:text-3xl font-black text-slate-900">Create PashuRakshak Account</h2>
         <p className="text-xs text-slate-500">
           Register with your location for real-time outbreak mapping, clinical triage, and urgent SOS alerts
         </p>

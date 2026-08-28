@@ -12,7 +12,7 @@ const MAHARASHTRA_DISTRICTS = [
   'Nashik', 'Solapur', 'Satara', 'Sangli'
 ];
 
-export default function VetConsultations({ user, setActivePage }) {
+export default function VetConsultations({ user, setUser, setActivePage }) {
   const isVet = user?.role === 'vet';
   
   // Default tab based on role
@@ -42,6 +42,15 @@ export default function VetConsultations({ user, setActivePage }) {
   const [unavailabilityNotice, setUnavailabilityNotice] = useState(user?.unavailability_notice || '');
   const [savingClinicStatus, setSavingClinicStatus] = useState(false);
   const [clinicSaveMsg, setClinicSaveMsg] = useState('');
+
+  useEffect(() => {
+    if (user) {
+      setClinicHours(user.clinic_hours || '08:00 AM - 08:00 PM (Mon-Sat)');
+      setClinicAvailability(user.clinic_availability || 'open');
+      setVisitingLocation(user.clinic_visiting_location || '');
+      setUnavailabilityNotice(user.unavailability_notice || '');
+    }
+  }, [user]);
 
   useEffect(() => {
     loadConsultations();
@@ -105,7 +114,7 @@ export default function VetConsultations({ user, setActivePage }) {
     setSavingClinicStatus(true);
     setClinicSaveMsg('');
     try {
-      await updateUserProfile({
+      const updated = await updateUserProfile({
         name: user?.name,
         role: 'vet',
         clinic_name: user?.clinic_name,
@@ -117,8 +126,11 @@ export default function VetConsultations({ user, setActivePage }) {
         clinic_visiting_location: visitingLocation,
         unavailability_notice: unavailabilityNotice
       });
+      if (setUser) {
+        setUser(updated);
+      }
       setClinicSaveMsg('✅ Clinic working hours and real-time availability updated successfully!');
-      loadVets();
+      await loadVets();
     } catch (err) {
       setClinicSaveMsg('Failed to update clinic status: ' + err.message);
     } finally {
@@ -127,16 +139,17 @@ export default function VetConsultations({ user, setActivePage }) {
   };
 
   const getStatusBadge = (status) => {
-    switch (status) {
-      case 'open':
-        return <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border border-emerald-200">🟢 Open Now</span>;
-      case 'visiting':
-        return <span className="bg-amber-100 text-amber-800 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border border-amber-200">🟡 On Field Duty</span>;
-      case 'vacation':
-        return <span className="bg-purple-100 text-purple-800 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border border-purple-200">🏖️ On Leave</span>;
-      default:
-        return <span className="bg-rose-100 text-rose-800 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border border-rose-200">🔴 Closed</span>;
+    const s = String(status || 'open').toLowerCase().trim();
+    if (s === 'visiting' || s.includes('field') || s.includes('visit')) {
+      return <span className="bg-amber-100 text-amber-800 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border border-amber-200">🟡 On Field Duty</span>;
     }
+    if (s === 'vacation' || s.includes('leave') || s.includes('vacation')) {
+      return <span className="bg-purple-100 text-purple-800 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border border-purple-200">🏖️ On Leave</span>;
+    }
+    if (s === 'closed' || s.includes('close')) {
+      return <span className="bg-rose-100 text-rose-800 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border border-rose-200">🔴 Closed</span>;
+    }
+    return <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border border-emerald-200">🟢 Open Now</span>;
   };
 
   return (
@@ -319,17 +332,19 @@ export default function VetConsultations({ user, setActivePage }) {
                     {vet.phone && (
                       <a
                         href={`tel:${vet.phone}`}
-                        className="w-1/2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs text-center transition-colors shadow-sm flex items-center justify-center gap-1"
+                        className={`${isVet ? 'w-full' : 'w-1/2'} bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs text-center transition-colors shadow-sm flex items-center justify-center gap-1`}
                       >
                         <span>📞 Call Doctor</span>
                       </a>
                     )}
-                    <button
-                      onClick={() => setActivePage('prediction')}
-                      className={`${vet.phone ? 'w-1/2' : 'w-full'} bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs text-center transition-colors shadow-sm`}
-                    >
-                      🩺 AI Scan & Review
-                    </button>
+                    {!isVet && (
+                      <button
+                        onClick={() => setActivePage('prediction')}
+                        className={`${vet.phone ? 'w-1/2' : 'w-full'} bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs text-center transition-colors shadow-sm`}
+                      >
+                        🩺 AI Scan & Review
+                      </button>
+                    )}
                   </div>
 
                 </div>
