@@ -271,14 +271,14 @@ The compiled static assets will be output to `vet-disease-detector/dist/`.
 
 ## 👥 8. Team Members & Contributors
 
-| # | Name | Course | Year / Sem | University | Contact Info |
-| :-: | :--- | :--- | :--- | :--- | :--- |
-| 1 | **Balaka Mandal** *(Team Leader)* | MCA | 2nd Sem | University of Kalyani | [github.com/balaka555](https://github.com/balaka555) |
-| 2 | **Swastik Acharyya** | M.Sc. Computer Science | 1st Sem | University of Kalyani | [github.com/arpangreat](https://github.com/arpangreat) |
-| 3 | **Rupal Karmakar** | M.Sc. AI and Data Science | 1st Sem | University of Kalyani | [github.com/Rupal2004-bytes](https://github.com/Rupal2004-bytes) |
-| 4 | **Abhilock Saha Chowdhury** | M.Sc. AI and Data Science | 1st Sem | University of Kalyani | — |
-| 5 | **Jyouti Mondal** | M.Sc. AI and Data Science | 1st Sem | University of Kalyani | — |
-| 6 | **Sayan Baishya** | M.Sc. AI and Data Science | 1st Sem | University of Kalyani | — |
+| # | Member Name | Course & Specialization | Sem | Institution | Profile & Contact |
+| :-: | :--- | :--- | :-: | :--- | :--- |
+| 1 | **Balaka Mandal** <br><sub>👑 *Team Leader*</sub> | Master of Computer Applications (MCA) | 2nd | University of Kalyani | [![GitHub](https://img.shields.io/badge/GitHub-%40balaka555-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/balaka555) |
+| 2 | **Swastik Acharyya** | M.Sc. Computer Science | 1st | University of Kalyani | [![GitHub](https://img.shields.io/badge/GitHub-%40arpangreat-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/arpangreat) |
+| 3 | **Rupal Karmakar** | M.Sc. AI and Data Science | 1st | University of Kalyani | [![GitHub](https://img.shields.io/badge/GitHub-%40Rupal2004--bytes-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/Rupal2004-bytes) |
+| 4 | **Abhilock Saha Chowdhury** | M.Sc. AI and Data Science | 1st | University of Kalyani | — |
+| 5 | **Jyouti Mondal** | M.Sc. AI and Data Science | 1st | University of Kalyani | — |
+| 6 | **Sayan Baishya** | M.Sc. AI and Data Science | 1st | University of Kalyani | — |
 
 ---
 
