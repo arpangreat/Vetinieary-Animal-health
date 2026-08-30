@@ -5,17 +5,17 @@
 <title>PashuRakshak (पशुरक्षक) - Animal Health & Outbreak Surveillance Platform - Technical Specification & Architecture Whitepaper</title>
 <style>
   @page {
-    size: A4;
-    margin: 18mm 14mm 18mm 14mm;
+    size: A4 portrait;
+    margin: 12mm 12mm 12mm 12mm;
     @bottom-right {
       content: counter(page);
     }
   }
 
   body {
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
-    font-size: 10pt;
-    line-height: 1.5;
+    font-family: 'Liberation Sans', 'DejaVu Sans', Arial, sans-serif;
+    font-size: 8.3pt;
+    line-height: 1.35;
     color: #1e293b;
     background-color: #ffffff;
     margin: 0;
@@ -24,224 +24,122 @@
 
   /* Cover & Title Section */
   .cover {
-    border-bottom: 3px solid #059669;
-    padding-bottom: 20px;
-    margin-bottom: 25px;
+    border-bottom: 2.5px solid #059669;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
   }
   .title-tag {
     display: inline-block;
-    background: #d1fae5;
+    background-color: #d1fae5;
     color: #065f46;
-    font-size: 8pt;
+    font-size: 7.2pt;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 3px 10px;
-    border-radius: 4px;
-    margin-bottom: 10px;
+    letter-spacing: 0.8px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-bottom: 4px;
   }
   h1.main-title {
-    font-size: 22pt;
+    font-size: 16pt;
     font-weight: 800;
     color: #0f172a;
     line-height: 1.2;
-    margin: 0 0 8px 0;
+    margin: 0 0 4px 0;
   }
   .sub-title {
-    font-size: 11.5pt;
+    font-size: 9.5pt;
     color: #475569;
-    margin: 0 0 14px 0;
+    margin: 0 0 6px 0;
     font-weight: 500;
-  }
-  .meta-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    padding: 10px 14px;
-    font-size: 8.5pt;
-  }
-  .meta-item strong {
-    color: #0f172a;
-    display: block;
-    margin-bottom: 2px;
-  }
-  .meta-item span {
-    color: #64748b;
   }
 
   /* Headings */
   h2 {
-    font-size: 14pt;
+    font-size: 11pt;
     font-weight: 800;
     color: #0f172a;
-    border-bottom: 1.5px solid #e2e8f0;
-    padding-bottom: 5px;
-    margin-top: 24px;
-    margin-bottom: 10px;
-    page-break-after: avoid;
-  }
-  h3 {
-    font-size: 11.5pt;
-    font-weight: 700;
-    color: #065f46;
-    margin-top: 16px;
+    border-bottom: 1.5px solid #cbd5e1;
+    padding-bottom: 2px;
+    margin-top: 10px;
     margin-bottom: 6px;
     page-break-after: avoid;
   }
-  h4 {
-    font-size: 10pt;
-    font-weight: 700;
-    color: #334155;
-    margin-top: 12px;
-    margin-bottom: 4px;
-    page-break-after: avoid;
-  }
 
-  /* Content Elements */
   p {
-    margin: 0 0 8px 0;
+    margin: 0 0 5px 0;
     text-align: justify;
-  }
-  ul, ol {
-    margin: 0 0 10px 0;
-    padding-left: 18px;
-  }
-  li {
-    margin-bottom: 3px;
   }
 
   /* Callout Boxes */
   .callout {
-    background: #f0fdf4;
+    background-color: #f0fdf4;
     border-left: 4px solid #10b981;
-    border-radius: 0 6px 6px 0;
-    padding: 10px 12px;
-    margin: 10px 0;
-    font-size: 9pt;
+    padding: 6px 8px;
+    margin: 6px 0;
+    font-size: 8pt;
+    page-break-inside: avoid;
   }
   .callout.info {
-    background: #eff6ff;
+    background-color: #eff6ff;
     border-left-color: #2563eb;
   }
   .callout.warning {
-    background: #fffbeb;
+    background-color: #fffbeb;
     border-left-color: #d97706;
-  }
-  .callout.danger {
-    background: #fef2f2;
-    border-left-color: #ef4444;
   }
   .callout-title {
     font-weight: 800;
     color: #0f172a;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
   }
 
   /* Tables */
   table {
     width: 100%;
     border-collapse: collapse;
-    margin: 12px 0;
-    font-size: 8.5pt;
+    margin: 5px 0 8px 0;
+    font-size: 7.6pt;
     page-break-inside: avoid;
   }
   th {
-    background: #f1f5f9;
+    background-color: #f1f5f9;
     color: #0f172a;
-    font-weight: 700;
+    font-weight: bold;
     text-align: left;
-    padding: 7px 9px;
+    padding: 4px 6px;
     border: 1px solid #cbd5e1;
   }
   td {
-    padding: 6px 9px;
-    border: 1px solid #e2e8f0;
+    padding: 4px 6px;
+    border: 1px solid #cbd5e1;
     vertical-align: top;
   }
   tr:nth-child(even) td {
-    background: #f8fafc;
+    background-color: #f8fafc;
   }
 
-  /* Code & Syntax */
   code {
-    font-family: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
-    font-size: 8pt;
-    background: #f1f5f9;
+    font-family: 'Liberation Mono', 'Courier New', monospace;
+    font-size: 7.2pt;
+    background-color: #f1f5f9;
     color: #0f172a;
-    padding: 1px 4px;
-    border-radius: 3px;
+    padding: 1px 2px;
+    border-radius: 2px;
     border: 1px solid #e2e8f0;
-  }
-  pre {
-    background: #0f172a;
-    color: #f8fafc;
-    font-family: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
-    font-size: 7.8pt;
-    line-height: 1.4;
-    padding: 10px;
-    border-radius: 6px;
-    overflow-x: auto;
-    margin: 10px 0;
-    page-break-inside: avoid;
-  }
-  pre code {
-    background: transparent;
-    color: inherit;
-    padding: 0;
-    border: none;
-  }
-
-  /* Architecture Diagram Box */
-  .diagram-box {
-    background: #f8fafc;
-    border: 1.5px dashed #94a3b8;
-    border-radius: 6px;
-    padding: 10px;
-    margin: 12px 0;
-    font-family: monospace;
-    font-size: 7.5pt;
-    line-height: 1.3;
-    color: #0f172a;
-    page-break-inside: avoid;
-  }
-
-  /* Grid Layouts */
-  .card-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin: 10px 0;
-  }
-  .card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    padding: 9px 11px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-  }
-  .card-header {
-    font-weight: 700;
-    color: #065f46;
-    font-size: 9.5pt;
-    margin-bottom: 3px;
   }
 
   .badge {
     display: inline-block;
-    font-size: 7pt;
-    font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 3px;
+    font-size: 6.5pt;
+    font-weight: bold;
+    padding: 1px 4px;
+    border-radius: 2px;
     text-transform: uppercase;
   }
-  .badge-blue { background: #dbeafe; color: #1e40af; }
-  .badge-green { background: #dcfce7; color: #166534; }
-  .badge-amber { background: #fef3c7; color: #92400e; }
-  .badge-red { background: #fee2e2; color: #991b1b; }
-  .badge-purple { background: #f3e8ff; color: #6b21a8; }
+  .badge-green { background-color: #dcfce7; color: #166534; }
+  .badge-amber { background-color: #fef3c7; color: #92400e; }
+  .badge-red { background-color: #fee2e2; color: #991b1b; }
 
   .page-break {
     page-break-before: always;
@@ -250,102 +148,106 @@
 </head>
 <body>
 
-<!-- Cover / Header -->
+<!-- ==================== PAGE 1 ==================== -->
 <div class="cover">
   <span class="title-tag">System Architecture & Technical Specification Whitepaper</span>
   <h1 class="main-title">PashuRakshak (पशुरक्षक) - Animal Health & Outbreak Surveillance Platform</h1>
   <div class="sub-title">An End-to-End Clinical Screening, Geospatial Outbreak Sensing & Coordinated Epidemic Defense System</div>
   
-  <div class="meta-grid">
-    <div class="meta-item">
-      <strong>Problem Statement ID</strong>
-      <span>PS 26128 (Govt of Maharashtra)</span>
-    </div>
-    <div class="meta-item">
-      <strong>Platform Core</strong>
-      <span>Go 1.22+ / Triple SQLite WAL</span>
-    </div>
-    <div class="meta-item">
-      <strong>Clinical Decision Engine</strong>
-      <span>viggovet/viggoVet-Reasoning-20B</span>
-    </div>
-    <div class="meta-item">
-      <strong>Document Edition</strong>
-      <span>v3.4.0 Production Release</span>
-    </div>
-  </div>
+  <table border="1" cellspacing="0" cellpadding="4" bordercolor="#cbd5e1" style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td style="width: 25%; background-color: #f8fafc;">
+        <strong style="color: #0f172a; display: block; font-size: 7.5pt;">Problem Statement ID</strong>
+        <span style="color: #64748b; font-size: 7.5pt;">PS 26128 (Govt of Maharashtra & MSIS)</span>
+      </td>
+      <td style="width: 25%; background-color: #f8fafc;">
+        <strong style="color: #0f172a; display: block; font-size: 7.5pt;">Platform Core</strong>
+        <span style="color: #64748b; font-size: 7.5pt;">Go 1.22+ / Triple SQLite WAL</span>
+      </td>
+      <td style="width: 25%; background-color: #f8fafc;">
+        <strong style="color: #0f172a; display: block; font-size: 7.5pt;">Clinical Decision Engine</strong>
+        <span style="color: #64748b; font-size: 7.5pt;">Qwen2.5-VL & viggoVet-Reasoning-20B</span>
+      </td>
+      <td style="width: 25%; background-color: #f8fafc;">
+        <strong style="color: #0f172a; display: block; font-size: 7.5pt;">Document Edition</strong>
+        <span style="color: #64748b; font-size: 7.5pt;">v4.1.0 Production Whitepaper</span>
+      </td>
+    </tr>
+  </table>
 </div>
 
 <!-- 1. Problem Statement Alignment -->
 <h2>1. Problem Statement Alignment (PS ID 26128)</h2>
 <div class="callout info">
   <div class="callout-title">🏛️ Official Problem Statement 26128 &bull; Government of Maharashtra & MSIS</div>
-  <p style="margin: 0; font-size: 8.5pt;">
+  <p style="margin: 0; font-size: 7.6pt; line-height: 1.35;">
     <strong>Title:</strong> Efficient systems for early detection, prevention, and management of livestock diseases and animal health issues<br>
     <strong>Description:</strong> Livestock owners, field veterinarians, para-veterinary workers and government departments often lack a unified, realtime mechanism to identify emerging animal-health risks at the village, block and district levels. Disease symptoms may be reported late, diagnostic facilities may be distant, vaccination and treatment histories may be incomplete, and information from farms, veterinary dispensaries, laboratories, vaccination drives and surveillance programmes may remain fragmented. These gaps can delay containment, increase livestock mortality and productivity loss, raise the risk of zoonotic transmission, and affect farmers’ incomes. The challenge is to create a practical system that enables early warning, rapid reporting, risk assessment, preventive action, referral and coordinated response.
   </p>
 </div>
 <p>
-The <strong>PashuRakshak</strong> platform is engineered as a direct solution to this mandate, uniting dairy farmers, pastoralists, licensed veterinary doctors, dispensaries, NGOs, and state authorities into an interconnected, real-time epidemiological grid.
+The <strong>PashuRakshak (पशुरक्षक)</strong> platform is engineered as a direct solution to this mandate, uniting dairy farmers, pastoralists, licensed veterinary doctors, dispensaries, NGOs, and state animal husbandry authorities into an interconnected, real-time epidemiological grid.
 </p>
 
-<!-- 2. System Architecture & Multi-Role Portals -->
+<!-- 2. Multi-Role Ecosystem & Geospatial Entity Mapping -->
 <h2>2. Multi-Role Ecosystem & Geospatial Entity Mapping</h2>
 <p>
 To address fragmentation between field workers and clinical facilities, the platform partitions functionality across four primary user classes:
 </p>
 
-<div class="card-grid">
-  <div class="card">
-    <div class="card-header">🚜 Livestock Farmers & Dairy Owners (<code>farmer</code>)</div>
-    <p style="font-size: 8pt; color: #475569; margin: 0;">
-      Registers farm name, village (गावाचे नाव), taluka, district, livestock types (Cattle, Buffalo, Goat, Sheep, Poultry, Swine), and herd size. Features livestock video/photo screening, real-time outbreak SOS radar, recovery reporting (<code>POST /api/outbreaks/report-recovery</code>), and nearby clinic directory.
-    </p>
-  </div>
-  <div class="card">
-    <div class="card-header">🐾 Companion Pet Parents (<code>pet_owner</code>)</div>
-    <p style="font-size: 8pt; color: #475569; margin: 0;">
-      Registers address, city, district, and pincode. Features instant lesion & motion gait screening, broad-spectrum contagion alerts (e.g. Canine Parvovirus, Feline Panleukopenia), and one-tap doctor second-opinion requests.
-    </p>
-  </div>
-  <div class="card">
-    <div class="card-header">🩺 Licensed Veterinarians & Clinics (<code>vet</code>)</div>
-    <p style="font-size: 8pt; color: #475569; margin: 0;">
-      Dedicated Doctor Decision Hub: Case Review Queue to inspect doubtful screenings, verify diagnoses, issue ℞ prescriptions, manage live clinic operating hours, broadcast current field visiting locations, and post leave notices.
-    </p>
-  </div>
-  <div class="card">
-    <div class="card-header">📦 NGOs & Government Dispensaries (<code>ngo</code> / <code>gov</code>)</div>
-    <p style="font-size: 8pt; color: #475569; margin: 0;">
-      Real-time emergency inventory management for critical vaccines (FMD, Lumpy Skin, PPR), broad-spectrum antibiotics, antiseptics, and PPE kits with automated low-stock warnings and official circular broadcasting.
-    </p>
-  </div>
-</div>
+<table border="1" cellspacing="0" cellpadding="4" bordercolor="#cbd5e1" style="width: 100%; border-collapse: collapse;">
+  <tr>
+    <td style="width: 50%; background-color: #ffffff;">
+      <strong style="color: #065f46; font-size: 8pt; display: block; margin-bottom: 2px;">🚜 Livestock Farmers & Dairy Owners (<code>farmer</code>)</strong>
+      <span style="font-size: 7.4pt; color: #475569;">
+        Registers farm name, village (गावाचे नाव), taluka, district, livestock types (Cattle, Buffalo, Goat, Sheep, Poultry, Swine), and herd size. Features livestock video/photo screening, real-time outbreak SOS radar, recovery reporting (<code>POST /api/outbreaks/report-recovery</code>), and nearby clinic directory.
+      </span>
+    </td>
+    <td style="width: 50%; background-color: #ffffff;">
+      <strong style="color: #065f46; font-size: 8pt; display: block; margin-bottom: 2px;">🐾 Companion Pet Parents (<code>pet_owner</code>)</strong>
+      <span style="font-size: 7.4pt; color: #475569;">
+        Registers address, city, district, and pincode. Features instant lesion & motion gait screening, broad-spectrum contagion alerts (e.g. Canine Parvovirus, Feline Panleukopenia), and one-tap doctor second-opinion requests.
+      </span>
+    </td>
+  </tr>
+  <tr>
+    <td style="width: 50%; background-color: #ffffff;">
+      <strong style="color: #065f46; font-size: 8pt; display: block; margin-bottom: 2px;">🩺 Licensed Veterinarians & Clinics (<code>vet</code>)</strong>
+      <span style="font-size: 7.4pt; color: #475569;">
+        Dedicated Doctor Decision Hub: Case Review Queue to inspect doubtful screenings, verify diagnoses, issue ℞ prescriptions, manage live clinic operating hours, broadcast current field visiting locations, and post leave notices.
+      </span>
+    </td>
+    <td style="width: 50%; background-color: #ffffff;">
+      <strong style="color: #065f46; font-size: 8pt; display: block; margin-bottom: 2px;">📦 NGOs & Government Dispensaries (<code>ngo</code> / <code>gov</code>)</strong>
+      <span style="font-size: 7.4pt; color: #475569;">
+        Real-time emergency inventory management for critical vaccines (FMD, Lumpy Skin, PPR), broad-spectrum antibiotics, antiseptics, and PPE kits with automated low-stock warnings and official circular broadcasting.
+      </span>
+    </td>
+  </tr>
+</table>
 
 <!-- 3. Dynamic Outbreak Sensing & Resolution Engine -->
 <h2>3. Dynamic Outbreak Sensing, Vet Consensus & Resolution Engine</h2>
-<p>
-Unlike static alert placeholders, PashuRakshak incorporates a dynamic epidemiological state engine:
-</p>
-
-<div class="card-grid">
-  <div class="card">
-    <div class="card-header">🚨 Rule 1: Veterinarian Consensus Trigger</div>
-    <p style="font-size: 8pt; color: #475569; margin: 0;">
-      When $\ge 3$ licensed veterinarians confirm the same infectious disease (e.g. FMD, Lumpy Skin, PPR, Parvo, Anthrax) within a district, the system automatically flags a <strong>Verified Outbreak</strong> (<code>status = 'active'</code>, <code>severity = 'CRITICAL'</code>) and dispatches district-wide SOS alerts.
-    </p>
-  </div>
-  <div class="card">
-    <div class="card-header">🚜 Rule 2: Farmer Clustering Trigger</div>
-    <p style="font-size: 8pt; color: #475569; margin: 0;">
-      When $\ge 3$ farmers in the same locality/taluka report matching clinical symptoms via multimodal scans or consult requests, an active outbreak cluster is automatically formed with actionable biosecurity protocols.
-    </p>
-  </div>
-</div>
+<table border="1" cellspacing="0" cellpadding="4" bordercolor="#cbd5e1" style="width: 100%; border-collapse: collapse;">
+  <tr>
+    <td style="width: 50%; background-color: #ffffff;">
+      <strong style="color: #991b1b; font-size: 8pt; display: block; margin-bottom: 2px;">🚨 Rule 1: Veterinarian Consensus Trigger</strong>
+      <span style="font-size: 7.4pt; color: #475569;">
+        When <strong>3 or more (&ge; 3)</strong> licensed veterinarians confirm the same infectious disease (e.g. FMD, Lumpy Skin, PPR, Parvo, Anthrax) within a district, the system automatically flags a <strong>Verified Outbreak</strong> (<code>status = 'active'</code>, <code>severity = 'CRITICAL'</code>) and dispatches district-wide SOS alerts.
+      </span>
+    </td>
+    <td style="width: 50%; background-color: #ffffff;">
+      <strong style="color: #065f46; font-size: 8pt; display: block; margin-bottom: 2px;">🚜 Rule 2: Farmer Clustering Trigger</strong>
+      <span style="font-size: 7.4pt; color: #475569;">
+        When <strong>3 or more (&ge; 3)</strong> farmers in the same locality or taluka report matching clinical symptoms via multimodal scans or consult requests, an active outbreak cluster is automatically formed with actionable biosecurity protocols.
+      </span>
+    </td>
+  </tr>
+</table>
 
 <div class="callout warning">
   <div class="callout-title">🔄 Dynamic Outbreak Resolution Lifecycle</div>
-  <p style="margin: 0; font-size: 8.5pt;">
+  <p style="margin: 0; font-size: 7.6pt;">
     <strong>Recovery Reporting:</strong> Farmers or paravets submit recovery counts (<code>POST /api/outbreaks/report-recovery</code>). Active affected counts decrement dynamically.<br>
     <strong>Containment Clearance:</strong> When affected counts reach 0 or when veterinarians issue an official resolution certificate (<code>POST /api/outbreaks/resolve</code>), the outbreak transitions to <code>status = 'resolved'</code>, <code>severity = 'RESOLVED'</code>, the active red SOS flag is cleared, and an all-clear resolution notice is broadcast across the district.
   </p>
@@ -353,39 +255,85 @@ Unlike static alert placeholders, PashuRakshak incorporates a dynamic epidemiolo
 
 <div class="page-break"></div>
 
-<!-- 4. End-to-End System Architecture Diagram -->
-<h2>4. End-to-End Architecture & Data Flow Diagram</h2>
+<!-- ==================== PAGE 2 ==================== -->
 
-<div class="diagram-box">
-+---------------------------------------------------------------------------------------------------------------------------------+
-|                                                 PASHURAKSHAK FRONTEND SPA (React 18 / Tailwind)                                 |
-|   [Farmers: Herd Scanner & Outbreak SOS]    [Vets: Case Queue & Duty Management]    [Directory & Biosecurity Defense Radar]      |
-+---------------------------------------------------------------+-----------------------------------------------------------------+
-                                                                |
-                          REST API (X-Auth-Token, X-User-ID, Multipart / JSON) -> http://localhost:8080
-                                                                v
-+---------------------------------------------------------------------------------------------------------------------------------+
-|                                            GO HIGH-PERFORMANCE BACKEND (Go 1.22+)                                                |
-|   - Authentication Middleware & Bcrypt Security      - Outbreak Cluster Sensing & Consensus Engine                              |
-|   - FFmpeg Temporal Keyframe Extractor (4 Frames)     - Asynchronous Backup Snapshot Hook (VACUUM INTO)                          |
-+------------------------------------+----------------------------------------------------+---------------------------------------+
-                                     |                                                    |
-          Multipart Media Ingestion  |                      AI Inference Request          |  Surveillance & Case Escalation
-                                     v                                                    v                                       v
-+------------------------------------+-----------+   +------------------------------------+-----------+   +-----------------------+
-|        STORAGE & MEDIA ENGINE                  |   |        DUAL-STAGE MULTIMODAL AI PIPELINE       |   |  CONSENSUS & RECOVERY |
-|  - Content-Addressable Storage (./uploads/)    |   |  Stage 1: Qwen2.5-VL-72B-Instruct (Vision)     |   |  - Vet Consensus &ge;3|
-|  - FFmpeg 4-Frame Keyframe Generator (JPEG)    |   |  Stage 2: viggovet/viggoVet-Reasoning-20B      |   |  - Farmer Cluster &ge;3|
-+------------------------------------------------+   +------------------------------------------------+   +-----------------------+
-                                                                |
-                                                                v
-                                      +----------------------------------------------------+
-                                      |                 TRIPLE SQLITE 3 WAL STORAGE        |
-                                      |  - user.db: User accounts, Bcrypt hashes & auth    |
-                                      |  - animal_health.db: Profiles, Aadhaar & Labs (v5) |
-                                      |  - surveillance.db: Outbreaks, SOS & Circulars     |
-                                      +----------------------------------------------------+
-</div>
+<!-- 4. End-to-End System Architecture & Data Flow -->
+<h2 style="page-break-before: always;">4. End-to-End Architecture & Data Flow</h2>
+
+<table border="1" cellspacing="0" cellpadding="4" bordercolor="#cbd5e1" style="width: 100%; border-collapse: collapse; margin: 6px 0;">
+  <tr>
+    <td colspan="3" style="background-color: #064e3b; color: #ffffff; padding: 6px; text-align: center; font-weight: bold; font-size: 8.5pt;">
+      🌐 PASHURAKSHAK FRONTEND CLIENT (React 18 / Tailwind CSS)
+      <div style="font-weight: normal; font-size: 7.2pt; color: #a7f3d0; margin-top: 1px;">
+        [Farmers: Herd Screening & Outbreak Radar] &bull; [Vets: Decision Hub & Pashu Aadhaar Search] &bull; [Dispensaries: Vaccine Stock Grid]
+      </div>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3" style="background-color: #f0fdf4; color: #065f46; padding: 3px; text-align: center; font-size: 7.2pt; border: 1px solid #cbd5e1;">
+      ⬇️ REST API (JSON &bull; Multipart/form-data &bull; X-Auth-Token Header) ⬇️
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3" style="background-color: #0f172a; color: #f8fafc; padding: 6px; text-align: center; font-weight: bold; font-size: 8.5pt;">
+      ⚙️ GO HIGH-PERFORMANCE BACKEND SERVICE (Go 1.22+ &bull; CGO &bull; net/http)
+      <div style="font-weight: normal; font-size: 7.2pt; color: #94a3b8; margin-top: 1px;">
+        Bcrypt Authentication &bull; Outbreak Cluster Consensus Engine &bull; FFmpeg 4-Frame Temporal Keyframe Extractor
+      </div>
+    </td>
+  </tr>
+  <tr>
+    <td style="width: 33.3%; background-color: #f8fafc; vertical-align: top;">
+      <strong style="color: #065f46; font-size: 7.8pt; display: block; margin-bottom: 2px;">📁 Media Engine</strong>
+      <div style="font-size: 7pt; color: #475569;">
+        &bull; Content-Addressable Storage<br>
+        &bull; FFmpeg 4-Frame Video Ingestion<br>
+        &bull; Temporal Gait & Lesion Slices
+      </div>
+    </td>
+    <td style="width: 33.3%; background-color: #f8fafc; vertical-align: top;">
+      <strong style="color: #065f46; font-size: 7.8pt; display: block; margin-bottom: 2px;">🧠 Clinical Decision Engine</strong>
+      <div style="font-size: 7pt; color: #475569;">
+        &bull; Visual Analysis (Qwen2.5-VL)<br>
+        &bull; Differential Reasoning (viggoVet)<br>
+        &bull; 4-Level Emergency Triage
+      </div>
+    </td>
+    <td style="width: 33.3%; background-color: #f8fafc; vertical-align: top;">
+      <strong style="color: #065f46; font-size: 7.8pt; display: block; margin-bottom: 2px;">🚨 Surveillance & Consensus</strong>
+      <div style="font-size: 7pt; color: #475569;">
+        &bull; Vet Consensus &ge; 3 Trigger<br>
+        &bull; Farmer Cluster &ge; 3 Trigger<br>
+        &bull; Dynamic Recovery Clearance
+      </div>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3" style="background-color: #f1f5f9; color: #334155; padding: 3px; text-align: center; font-size: 7.2pt; border: 1px solid #cbd5e1;">
+      ⬇️ Zero Lock-Contention WAL Persistence ⬇️
+    </td>
+  </tr>
+  <tr>
+    <td style="background-color: #ffffff; vertical-align: top;">
+      <strong style="color: #0f172a; font-size: 7.8pt;">🗄️ user.db (v4)</strong>
+      <div style="font-size: 7pt; color: #64748b;">
+        Users, Roles, Bcrypt Auth, 30-Day Sessions, Clinic Hours & Visiting Locations
+      </div>
+    </td>
+    <td style="background-color: #ffffff; vertical-align: top;">
+      <strong style="color: #0f172a; font-size: 7.8pt;">🗄️ animal_health.db (v5)</strong>
+      <div style="font-size: 7pt; color: #64748b;">
+        Pashu Aadhaar 12-Digit Tags, Health Passports, Doctor Lab Results, Screenings
+      </div>
+    </td>
+    <td style="background-color: #ffffff; vertical-align: top;">
+      <strong style="color: #0f172a; font-size: 7.8pt;">🗄️ surveillance.db (v2)</strong>
+      <div style="font-size: 7pt; color: #64748b;">
+        Outbreak Clusters, SOS Alerts, Doctor Review Queue, Vaccine Supplies, Circulars
+      </div>
+    </td>
+  </tr>
+</table>
 
 <!-- 5. Multi-Database Architecture -->
 <h2>5. Triple SQLite Schema Architecture & Data Flow Isolation</h2>
@@ -393,12 +341,12 @@ Unlike static alert placeholders, PashuRakshak incorporates a dynamic epidemiolo
 To ensure fault isolation and prevent surveillance queries from competing with clinic authentication, storage is split into three independent SQLite databases running in Write-Ahead Logging (WAL) mode:
 </p>
 
-<table>
+<table border="1" cellspacing="0" cellpadding="3.5" bordercolor="#cbd5e1" style="width: 100%; border-collapse: collapse;">
   <thead>
     <tr>
-      <th style="width: 25%;">Database & Engine</th>
-      <th style="width: 25%;">Table Name</th>
-      <th style="width: 50%;">Schema Structure & Key Indexes</th>
+      <th style="width: 18%;">Database & Engine</th>
+      <th style="width: 22%;">Table Name</th>
+      <th style="width: 60%;">Schema Structure & Key Indexes</th>
     </tr>
   </thead>
   <tbody>
@@ -462,22 +410,24 @@ To ensure fault isolation and prevent surveillance queries from competing with c
 
 <div class="page-break"></div>
 
-<!-- 6. Complete RESTful API Specifications -->
-<h2>6. Complete RESTful API Specifications</h2>
+<!-- ==================== PAGE 3 ==================== -->
 
-<table>
+<!-- 6. Complete RESTful API Specifications -->
+<h2 style="page-break-before: always;">6. Complete RESTful API Specifications</h2>
+
+<table border="1" cellspacing="0" cellpadding="2.5" bordercolor="#cbd5e1" style="width: 100%; border-collapse: collapse;">
   <thead>
     <tr>
-      <th style="width: 22%;">Method & Path</th>
-      <th style="width: 23%;">Headers & Params</th>
-      <th style="width: 55%;">Description & Payload Architecture</th>
+      <th style="width: 24%;">Method & Path</th>
+      <th style="width: 22%;">Headers & Params</th>
+      <th style="width: 54%;">Description & Payload Architecture</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td><code>POST /api/auth/register</code></td>
       <td><code>Content-Type: json</code></td>
-      <td>Registers account with role (<code>farmer</code>, <code>pet_owner</code>, <code>vet</code>, <code>ngo</code>) and geo fields (farm name, village, taluka, clinic hours).</td>
+      <td>Registers account with role (<code>farmer</code>, <code>pet_owner</code>, <code>vet</code>, <code>ngo</code>) and geo fields.</td>
     </tr>
     <tr>
       <td><code>POST /api/auth/login</code></td>
@@ -487,67 +437,37 @@ To ensure fault isolation and prevent surveillance queries from competing with c
     <tr>
       <td><code>POST /api/auth/profile</code></td>
       <td><code>X-Auth-Token</code></td>
-      <td>Updates profile, farm parameters, or veterinarian availability duty status & leave notices.</td>
-    </tr>
-    <tr>
-      <td><code>POST /api/auth/change-password</code></td>
-      <td><code>X-Auth-Token</code></td>
-      <td>Changes user password with old password verification and audit logging.</td>
+      <td>Updates profile, farm parameters, or veterinarian duty status & leave notices.</td>
     </tr>
     <tr>
       <td><code>GET /api/vets</code></td>
       <td><code>?district=Pune</code></td>
-      <td>Returns directory of licensed veterinarians with real-time duty status, visiting location, and clinic hours.</td>
-    </tr>
-    <tr>
-      <td><code>POST /api/health-check/upload</code></td>
-      <td><code>multipart/form-data</code></td>
-      <td>Validates and writes image/video to content-addressable storage.</td>
+      <td>Returns directory of licensed veterinarians with real-time duty status and clinic hours.</td>
     </tr>
     <tr>
       <td><code>POST /api/health-check/analyze</code></td>
-      <td><code>X-Auth-Token</code>, <code>X-User-ID</code></td>
-      <td>Executes 4-frame temporal extraction, visual AI inspection, and veterinary medical differential assessment.</td>
+      <td><code>X-Auth-Token</code></td>
+      <td>Executes 4-frame temporal extraction, visual inspection, and differential assessment.</td>
     </tr>
     <tr>
       <td><code>GET /api/outbreaks</code></td>
-      <td><code>?district=...&species=...</code></td>
+      <td><code>?district=...</code></td>
       <td>Lists active and resolved disease clusters across Maharashtra districts.</td>
-    </tr>
-    <tr>
-      <td><code>GET /api/outbreaks/:id</code></td>
-      <td>Public / Auth</td>
-      <td>Fetches complete outbreak record with consensus stats, affected counts, and biosecurity guidelines.</td>
     </tr>
     <tr>
       <td><code>POST /api/outbreaks/report-recovery</code></td>
       <td><code>Content-Type: json</code></td>
-      <td>Reports herd recovery. Automatically decrements affected counts and clears SOS when resolved.</td>
+      <td>Reports herd recovery. Automatically decrements affected counts and clears SOS.</td>
     </tr>
     <tr>
       <td><code>POST /api/outbreaks/resolve</code></td>
-      <td><code>X-Auth-Token (Vet/Gov)</code></td>
-      <td>Issues official veterinary clearance certificate and containment notice.</td>
-    </tr>
-    <tr>
-      <td><code>GET /api/notifications</code></td>
-      <td><code>X-Auth-Token</code></td>
-      <td>Fetches targeted and broadcast SOS alerts and biosecurity notices.</td>
-    </tr>
-    <tr>
-      <td><code>POST /api/vet-consultations</code></td>
-      <td><code>X-Auth-Token</code></td>
-      <td>Farmers/Pet Owners request second opinion on doubtful AI scans.</td>
-    </tr>
-    <tr>
-      <td><code>POST /api/vet-consultations/review</code></td>
       <td><code>X-Auth-Token (Vet)</code></td>
-      <td>Doctor submits clinical diagnosis, advice, and ℞ prescriptions. Triggers consensus check.</td>
+      <td>Doctor issues official clearance certificate to resolve outbreak.</td>
     </tr>
     <tr>
       <td><code>GET /api/animals</code></td>
       <td><code>?q=...&tag_number=...</code></td>
-      <td>Fetches user's animals (farmers/owners) or full regional directory with Pashu Aadhaar search (veterinarians).</td>
+      <td>Fetches user's animals or full regional directory with Pashu Aadhaar search (veterinarians).</td>
     </tr>
     <tr>
       <td><code>GET /api/animals/tag/:tag</code></td>
@@ -555,19 +475,14 @@ To ensure fault isolation and prevent surveillance queries from competing with c
       <td>Instant lookup of any livestock or companion animal by 12-digit Pashu Aadhaar ear tag.</td>
     </tr>
     <tr>
-      <td><code>PUT /api/animals/:id</code></td>
-      <td><code>X-Auth-Token</code></td>
-      <td>Updates animal profile details (species, breed, age, weight, Pashu Aadhaar tag, clinical notes).</td>
-    </tr>
-    <tr>
       <td><code>GET /api/clinic-test-results</code></td>
       <td><code>?animal_id=...</code></td>
-      <td>Confidential retrieval of doctor-issued lab test reports (accessible only by owner and attending vets).</td>
+      <td>Confidential retrieval of doctor-issued lab test reports (owner & attending vets only).</td>
     </tr>
     <tr>
       <td><code>POST /api/clinic-test-results</code></td>
       <td><code>X-Auth-Token (Vet)</code></td>
-      <td>Veterinarian publishes official lab test report (CBC, Mastitis CMT, PCR) and notifies animal owner.</td>
+      <td>Veterinarian publishes official lab test report (CBC, Mastitis CMT, PCR).</td>
     </tr>
     <tr>
       <td><code>GET /api/inventory</code></td>
@@ -577,7 +492,7 @@ To ensure fault isolation and prevent surveillance queries from competing with c
     <tr>
       <td><code>PUT / DELETE /api/inventory</code></td>
       <td><code>X-Auth-Token</code></td>
-      <td>Updates or deletes inventory stock with strict ownership enforcement (only the creator can modify).</td>
+      <td>Updates or deletes inventory stock (strictly restricted to the record creator).</td>
     </tr>
     <tr>
       <td><code>GET /api/gov-advisories</code></td>
@@ -590,45 +505,45 @@ To ensure fault isolation and prevent surveillance queries from competing with c
 <!-- 7. Verified Clinical Case Studies -->
 <h2>7. Clinical Verification Benchmarks across Livestock & Companion Animals</h2>
 
-<table>
+<table border="1" cellspacing="0" cellpadding="2.5" bordercolor="#cbd5e1" style="width: 100%; border-collapse: collapse;">
   <thead>
     <tr>
       <th style="width: 22%;">Clinical Scenario</th>
-      <th style="width: 25%;">Visual Analysis (Qwen-VL)</th>
-      <th style="width: 38%;">Veterinary Differentials (ViggoVet)</th>
-      <th style="width: 15%;">Triage & Outbreak Status</th>
+      <th style="width: 25%;">Visual Analysis</th>
+      <th style="width: 38%;">Veterinary Differentials</th>
+      <th style="width: 15%;">Triage & Outbreak</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td><strong>Bovine Farm Cluster</strong><br><small>Baramati Dairy Farm, Cattle fever & salivation</small></td>
-      <td>Excessive ropy salivation, interdigital foot vesicles, oral erosions on tongue, lameness.</td>
-      <td>1. <strong>[HIGH] Foot-and-Mouth Disease (FMD / लाळ्या खुरकूत)</strong><br>2. [MODERATE] Vesicular Stomatitis<br>3. [POSSIBLE] Bovine Viral Diarrhea (BVD)</td>
+      <td><strong>Bovine Farm Cluster</strong><br><small>Baramati Dairy Farm, Cattle</small></td>
+      <td>Excessive ropy salivation, interdigital foot vesicles, oral erosions on tongue.</td>
+      <td>1. <strong>[HIGH] Foot-and-Mouth Disease (FMD / लाळ्या खुरकूत)</strong><br>2. [MODERATE] Vesicular Stomatitis</td>
       <td><span class="badge badge-red">CRITICAL SOS</span><br><small>Verified Outbreak Active</small></td>
     </tr>
     <tr>
-      <td><strong>Caprine Epidemic</strong><br><small>Sangamner Goat Herd, fever & erosions</small></td>
-      <td>Mucopurulent ocular-nasal discharge, necrotic stomatitis, dyspnea, diarrhea staining.</td>
-      <td>1. <strong>[HIGH] Peste des Petits Ruminants (PPR)</strong><br>2. [MODERATE] Contagious Caprine Pleuropneumonia<br>3. [POSSIBLE] Goat Pox</td>
+      <td><strong>Caprine Epidemic</strong><br><small>Sangamner Goat Herd</small></td>
+      <td>Mucopurulent ocular-nasal discharge, necrotic stomatitis, dyspnea.</td>
+      <td>1. <strong>[HIGH] Peste des Petits Ruminants (PPR)</strong><br>2. [MODERATE] Contagious Caprine Pleuropneumonia</td>
       <td><span class="badge badge-amber">URGENT</span><br><small>Ring Vaccine Deployed</small></td>
     </tr>
     <tr>
       <td><strong>Canine Motion Clip</strong><br><small>10s video of puppy twitching</small></td>
       <td>Rhythmic involuntary myoclonus (chewing-gum seizures), nasal hyperkeratosis.</td>
-      <td>1. <strong>[HIGH] Canine Distemper Encephalomyelitis</strong><br>2. [MODERATE] Idiopathic Epilepsy<br>3. [POSSIBLE] Viral Meningoencephalitis</td>
+      <td>1. <strong>[HIGH] Canine Distemper Encephalomyelitis</strong><br>2. [MODERATE] Idiopathic Epilepsy</td>
       <td><span class="badge badge-red">EMERGENCY</span><br><small>Doctor Consult Sent</small></td>
     </tr>
     <tr>
       <td><strong>Healed Dairy Herd</strong><br><small>Malegaon Budruk, Day 14 Follow-up</small></td>
-      <td>Complete re-epithelialization of oral lesions, normal gait, voluntary feeding resumed.</td>
+      <td>Complete re-epithelialization of oral lesions, normal gait, feeding resumed.</td>
       <td>1. <strong>[RESOLVED] Post-FMD Clinical Recovery</strong><br>2. Complete tissue healing confirmed.</td>
-      <td><span class="badge badge-green">RESOLVED</span><br><small>SOS Cleared &bull; Movement Open</small></td>
+      <td><span class="badge badge-green">RESOLVED</span><br><small>SOS Cleared &bull; Open</small></td>
     </tr>
   </tbody>
 </table>
 
-<div style="margin-top: 20px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 7.5pt; color: #64748b; text-align: center;">
-  PashuRakshak (पशुरक्षक) &bull; Livestock & Companion Animal Health & Outbreak Surveillance Platform &bull; In Alignment with Maharashtra PS ID 26128 &bull; Go, React 18, Triple SQLite WAL, Qwen2.5-VL & ViggoVet
+<div style="margin-top: 6px; padding-top: 4px; border-top: 1px solid #e2e8f0; font-size: 6.8pt; color: #64748b; text-align: center;">
+  PashuRakshak (पशुरक्षक) &bull; Livestock & Companion Animal Health & Outbreak Surveillance Platform &bull; In Alignment with Maharashtra PS ID 26128 &bull; Go, React 18, Triple SQLite WAL
 </div>
 
 </body>

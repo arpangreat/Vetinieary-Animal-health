@@ -28,16 +28,19 @@ Livestock owners, dairy farmers, field veterinarians, para-veterinary workers, N
 
 **PashuRakshak** is a unified, real-time epidemiological grid that connects livestock farmers, companion pet owners, licensed veterinarians, NGOs, and government animal husbandry departments into a collaborative biosecurity defense network.
 
-```text
-+---------------------------------------------------------------------------------------------------+
-|                                  PASHURAKSHAK UNIFIED PLATFORM                                    |
-+---------------------------------------------------------------------------------------------------+
-|  🚜 Farmers & Herdsmen   | 🩺 Licensed Doctors    | 📦 Dispensaries & NGOs | 🏛️ Govt Animal Husbandry|
-|  - Video/Photo Triage    | - Case Review Queue    | - Vaccine Inventory    | - District Radar Map   |
-|  - Outbreak SOS Alerts   | - ℞ E-Prescriptions    | - Supply Logistics     | - State Directives     |
-|  - Recovery Reporting    | - Confidential Lab Hub | - Stock Management     | - Containment Clearance|
-|  - Pashu Aadhaar Passport| - Ear Tag Lookup (12d) | - Low Stock Alerts     | - 1962 Helpline Link   |
-+---------------------------------------------------------------------------------------------------+
+```mermaid
+flowchart TD
+    subgraph STAKEHOLDERS["👥 Connected Stakeholders"]
+        A["🚜 Farmers & Herdsmen<br/>• Video/Photo Screening<br/>• Pashu Aadhaar Passport<br/>• Recovery Reporting"]
+        B["🩺 Licensed Veterinarians<br/>• Case Review Queue<br/>• ℞ E-Prescriptions<br/>• Aadhaar Search (12-Digit)<br/>• Verified Lab Results Hub"]
+        C["📦 Dispensaries & NGOs<br/>• Vaccine & Serum Stock<br/>• Creator-Scoped Inventory<br/>• Automated Low-Stock Alerts"]
+        D["🏛️ Govt Animal Husbandry<br/>• District Outbreak Radar<br/>• State Circulars & Quarantine<br/>• Containment Clearance"]
+    end
+
+    A <-->|REST API & Secure Sessions| CORE["🐾 PashuRakshak Unified Grid"]
+    B <-->|REST API & Secure Sessions| CORE
+    C <-->|REST API & Secure Sessions| CORE
+    D <-->|REST API & Secure Sessions| CORE
 ```
 
 ### 🌟 Key Capabilities
@@ -50,8 +53,8 @@ Livestock owners, dairy farmers, field veterinarians, para-veterinary workers, N
    * Longitudinal timeline linking verified veterinary laboratory assays, screening histories, and species vaccination calendars (FMD, LSD, PPR, Brucellosis, Rabies).
    * Searchable by licensed veterinarians across districts.
 3. **Autonomous Outbreak Radar & Vet Consensus Engine:**
-   * **Rule 1 (Vet Consensus):** When $\ge 3$ licensed doctors in a district confirm matching infectious symptoms, the system triggers an active outbreak cluster and broadcasts SOS alarms.
-   * **Rule 2 (Farmer Reporting):** When $\ge 3$ local farms report identical symptoms, early-warning containment protocols activate.
+   * **Rule 1 (Vet Consensus):** When 3 or more (≥ 3) licensed doctors in a district confirm matching infectious symptoms, the system triggers an active outbreak cluster and broadcasts SOS alarms.
+   * **Rule 2 (Farmer Reporting):** When 3 or more (≥ 3) local farms report identical symptoms, early-warning containment protocols activate.
    * **Dynamic Recovery & Clearance:** When farmers report herd recovery (`POST /api/outbreaks/report-recovery`), active affected counts decrement, and official veterinary clearance resolves alerts.
 4. **Confidential Veterinary Lab Reporting:**
    * Attending veterinarians publish formal laboratory reports (Complete Blood Count, California Mastitis Test, PCR, Serum Neutralization) directly into the animal's Health Passport.
@@ -64,46 +67,70 @@ Livestock owners, dairy farmers, field veterinarians, para-veterinary workers, N
 
 ---
 
-## 🏗️ 3. Architecture & Tech Stack
+## 🔄 3. Outbreak Early Warning & Dynamic Resolution Lifecycle
 
-```text
-                               +----------------------------------------+
-                               |     REACT 18 SINGLE PAGE APP (SPA)     |
-                               |    Tailwind CSS, Vite, Lucide Icons    |
-                               +-------------------+--------------------+
-                                                   |
-                                                   | REST API / JSON / Multipart
-                                                   v
-                               +----------------------------------------+
-                               |      GO HIGH-PERFORMANCE BACKEND       |
-                               |     Go 1.22+  •  net/http  •  CGO      |
-                               +----+--------------+---------------+----+
-                                    |              |               |
-             +----------------------+              |               +----------------------+
-             v                                     v                                      v
-+------------------------+      +--------------------------------------+      +------------------------+
-|      USER STORAGE      |      |         ANIMAL HEALTH STORAGE        |      |  SURVEILLANCE STORAGE  |
-|        user.db         |      |           animal_health.db           |      |    surveillance.db     |
-|   - Users & Roles      |      |   - Animals & Pashu Aadhaar Tags     |      |   - Outbreaks & SOS    |
-|   - Bcrypt Passwords   |      |   - Screenings & Clinical Media      |      |   - Vet Review Queue   |
-|   - Sessions (30 days) |      |   - Verified Lab Test Reports        |      |   - Emergency Supplies |
-|   - Clinic Duty/Leave  |      |   - Species Vaccination Calendars    |      |   - State Directives   |
-+------------------------+      +--------------------------------------+      +------------------------+
+```mermaid
+stateDiagram-v2
+    [*] --> SymptomDetection : Farmer Uploads Scan / Vet Reviews Case
+    SymptomDetection --> ClusterEvaluation : Realtime Syndromic Analysis
+
+    state ClusterEvaluation {
+        Rule1 : Vet Consensus >= 3 Doctors
+        Rule2 : Farmer Cluster >= 3 Farms
+    }
+
+    ClusterEvaluation --> OutbreakActive : Threshold Met
+    OutbreakActive --> OutbreakActive : Broadcast District Red SOS & Ring Vaccine Directives
+    OutbreakActive --> DecrementCount : Farmers Submit Recovery (POST /api/outbreaks/report-recovery)
+    DecrementCount --> OutbreakActive : Affected Count > 0
+    DecrementCount --> OutbreakResolved : Affected Count = 0 OR Vet Issues Clearance Certificate (POST /api/outbreaks/resolve)
+    OutbreakResolved --> [*] : SOS Cleared & All-Clear Notice Broadcast
 ```
-
-* **Frontend:** React 18, Vite, Tailwind CSS, Lucide Icons, Bilingual localization (English / Marathi मराठी).
-* **Backend:** Go 1.22+ standard library with strict routing, Bcrypt password hashing, and multipart file ingestion.
-* **Database Engine:** Triple SQLite 3 in **Write-Ahead Logging (WAL)** mode for zero lock contention and complete domain isolation.
-* **Media & Keyframe Processing:** FFmpeg integration for 4-frame temporal video inspection.
 
 ---
 
-## ⚙️ 4. Prerequisites & Installation Requirements
+## 🏗️ 4. System Architecture & Data Flow
+
+```mermaid
+flowchart TD
+    subgraph CLIENT["🌐 FRONTEND CLIENT (React 18 / Tailwind CSS / Vite)"]
+        UI1["🚜 Farmers / Owners: Multimodal Screening & Health Passport"]
+        UI2["🩺 Veterinarians: Decision Hub & Pashu Aadhaar Directory"]
+        UI3["📦 NGOs / Dispensaries: Creator-Protected Vaccine Stock Grid"]
+        UI4["🏛️ Public / Gov: Real-time Outbreak Radar & Advisories"]
+    end
+
+    CLIENT -->|REST API • JSON / Multipart • X-Auth-Token| SERVER
+
+    subgraph SERVER["⚙️ GO HIGH-PERFORMANCE BACKEND (Go 1.22+ & CGO)"]
+        AUTH["🔐 Authentication & Bcrypt Session Manager"]
+        MEDIA["📁 FFmpeg 4-Frame Keyframe Extractor"]
+        CONSENSUS["🚨 Outbreak Sensing & Vet Consensus Engine"]
+        API["📡 HTTP Handler & Security Guard Router"]
+    end
+
+    SERVER --> DECISION_ENGINE
+    subgraph DECISION_ENGINE["🧠 CLINICAL DECISION ENGINE"]
+        VL["Qwen2.5-VL-72B (Visual Lesion Inspection)"]
+        REASONING["viggoVet-Reasoning-20B (Differential Assessment)"]
+    end
+
+    SERVER --> DB_LAYER
+    subgraph DB_LAYER["🗄️ TRIPLE SQLITE 3 STORAGE (Write-Ahead Logging / WAL Mode)"]
+        DB1["user.db (v4)<br/>• Users & Roles<br/>• Bcrypt Auth<br/>• Clinic Hours & Duty Status"]
+        DB2["animal_health.db (v5)<br/>• 12-Digit Pashu Aadhaar Registry<br/>• Health Passports<br/>• Confidential Lab Test Results<br/>• Screening History"]
+        DB3["surveillance.db (v2)<br/>• Outbreak Clusters & SOS Alarms<br/>• Doctor Consultation Queue<br/>• Emergency Vaccine Inventories<br/>• Government Directives"]
+    end
+```
+
+---
+
+## ⚙️ 5. Prerequisites & Installation Requirements
 
 Before building and running the project, ensure the following dependencies are installed on your machine:
 
 ### 1. **GCC Compiler & CGO (CRITICAL)**
-> **IMPORTANT:**
+> [!IMPORTANT]
 > The SQLite database engine (`github.com/mattn/go-sqlite3`) is written in C and requires **CGO** enabled during compilation (`CGO_ENABLED=1`). You **must have a C compiler (`gcc`) installed**.
 
 * **Ubuntu / Debian:**
@@ -132,7 +159,7 @@ Before building and running the project, ensure the following dependencies are i
 
 ---
 
-## 🚀 5. How to Run Locally
+## 🚀 6. How to Run Locally
 
 ### Step 1: Clone the Repository
 ```bash
@@ -215,7 +242,7 @@ The compiled static assets will be output to `vet-disease-detector/dist/`.
 
 ---
 
-## 📡 6. Core REST API Reference
+## 📡 7. Core REST API Reference
 
 | Method | Endpoint | Access Level | Description |
 | :--- | :--- | :--- | :--- |
@@ -242,7 +269,7 @@ The compiled static assets will be output to `vet-disease-detector/dist/`.
 
 ---
 
-## 👥 7. Team Members & Contributors
+## 👥 8. Team Members & Contributors
 
 | # | Name | Course | Year / Sem | University | Contact Info |
 | :-: | :--- | :--- | :--- | :--- | :--- |
